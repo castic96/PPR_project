@@ -1,0 +1,5 @@
+.vs/
+data/
+msvc/.vs/
+msvc/Debug/
+msvc/Release/
