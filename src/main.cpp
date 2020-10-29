@@ -2,10 +2,20 @@
 //
 
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include "dao/database_connector.h"
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    //std::cout << "Hello World!\n";
+    
+    kiv_ppr_db_connector::data_reader reader = kiv_ppr_db_connector::new_reader("..\\..\\data\\asc2018.sqlite");
+
+    kiv_ppr_db_connector::open_database(&reader);
+    kiv_ppr_db_connector::load_data(&reader);
+    kiv_ppr_db_connector::close_database(&reader);
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
