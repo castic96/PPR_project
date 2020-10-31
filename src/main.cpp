@@ -5,14 +5,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dao/database_connector.h"
+#include "neural_network/network.h"
 
-#define		START_ID		0
-#define     PREDICTION_MINUTES           60
+#define		START_ID		                0
+#define     PREDICTION_MINUTES              60
+#define     INPUT_LAYER_NEURONS_COUNT       8
+#define     HIDDEN1_LAYER_NEURONS_COUNT     16
+#define     HIDDEN2_LAYER_NEURONS_COUNT     26
+#define     OUTPUT_LAYER_NEURONS_COUNT      32
 
 int main()
 {
-    //std::cout << "Hello World!\n";
+    //exec_data_from_db();
+
+    std::vector<unsigned> topology;
+
+    topology.push_back(INPUT_LAYER_NEURONS_COUNT);
+    topology.push_back(HIDDEN1_LAYER_NEURONS_COUNT);
+    topology.push_back(HIDDEN2_LAYER_NEURONS_COUNT);
+    topology.push_back(OUTPUT_LAYER_NEURONS_COUNT);
+
+    kiv_ppr_network::network network = kiv_ppr_network::new_network(topology);
+
+
     
+
+}
+
+void exec_data_from_db() {
     kiv_ppr_db_connector::data_reader reader = kiv_ppr_db_connector::new_reader("..\\..\\data\\asc2018.sqlite");
 
     kiv_ppr_db_connector::open_database(&reader);
@@ -39,16 +59,4 @@ int main()
 
 
     kiv_ppr_db_connector::close_database(&reader);
-
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
