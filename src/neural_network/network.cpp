@@ -81,7 +81,7 @@ void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::ve
 		(network.recent_average_smoothing_factor + 1.0);
 
 	// Spocitani gradientu vystupni vrstvy
-	for (unsigned i = 0; i < output_layer.neurons.size(); i++) {
+	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
 		kiv_ppr_neuron::compute_output_gradient(output_layer.neurons[i], target_values[i]);
 	}
 
