@@ -46,7 +46,8 @@ double kiv_ppr_neuron::transfer_function(double value) {
 }
 
 double kiv_ppr_neuron::transfer_function_derivative(double value) {
-	return 1.0 - (tanh(value) * tanh(value));
+	return 1.0 - value * value;
+	//return 1.0 - (tanh(value) * tanh(value));
 }
 
 void kiv_ppr_neuron::compute_output_gradient(kiv_ppr_neuron::neuron& neuron, double target_value) {
