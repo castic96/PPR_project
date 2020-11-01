@@ -35,7 +35,8 @@ void kiv_ppr_network::feed_forward_prop(kiv_ppr_network::network &network, const
 
 	// Prirazeni vstupnich hodnot do vstupni vrstvy (vstupnich neuronu)
 	for (unsigned i = 0; i < input_values.size(); i++) {
-		network.layers[0].neurons[i].output_value = risk_function(input_values[i]);
+		//network.layers[0].neurons[i].output_value = risk_function(input_values[i]);
+		network.layers[0].neurons[i].output_value = input_values[i];
 	}
 
 	// Spusteni forward propagation
@@ -74,14 +75,15 @@ void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::ve
 	standard_error /= output_layer.neurons.size() - 1;
 	relative_error /= output_layer.neurons.size() - 1;
 
-	network.error = sqrt(standard_error) + relative_error;
+	//network.error = sqrt(standard_error) + relative_error;
+	network.error = sqrt(standard_error);
 
 	network.recent_average_error =
-		(network.recent_average_error * network.recent_average_smoothing_factor + network.error) /
-		(network.recent_average_smoothing_factor + 1.0);
+		(network.recent_average_error * RECENT_AVERAGE_SMOOTHING_FACTOR + network.error) /
+		(RECENT_AVERAGE_SMOOTHING_FACTOR + 1.0);
 
 	// Spocitani gradientu vystupni vrstvy
-	for (unsigned i = 0; i < output_layer.neurons.size(); i++) {
+	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
 		kiv_ppr_neuron::compute_output_gradient(output_layer.neurons[i], target_values[i]);
 	}
 
