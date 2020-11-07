@@ -6,7 +6,7 @@
 
 #include "database_connector.h"
 
-kiv_ppr_db_connector::data_reader kiv_ppr_db_connector::new_reader(const char* db_name) {
+kiv_ppr_db_connector::data_reader kiv_ppr_db_connector::new_reader(char* db_name) {
 
     kiv_ppr_db_connector::data_reader new_reader;
 
