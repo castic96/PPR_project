@@ -114,6 +114,7 @@ double kiv_ppr_network::risk_function(const double bg) {
 }
 
 void kiv_ppr_network::get_results(kiv_ppr_network::network& network, std::vector<double>& result_values) {
+	// TODO: predelat a volat zde Band_index_to_level
 	result_values.clear();
 
 	for (unsigned i = 0; i < network.layers.back().neurons.size() - 1; i++) {

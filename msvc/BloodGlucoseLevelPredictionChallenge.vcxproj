@@ -152,6 +152,8 @@
     <ClInclude Include="..\src\neural_network\network.h" />
     <ClInclude Include="..\src\neural_network\neuron.h" />
     <ClInclude Include="..\src\neural_network\synapse.h" />
+    <ClInclude Include="..\src\util\mapping.h" />
+    <ClInclude Include="..\src\constants.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
@@ -159,6 +161,7 @@
     <ClCompile Include="..\src\neural_network\network.cpp" />
     <ClCompile Include="..\src\neural_network\neuron.cpp" />
     <ClCompile Include="..\src\neural_network\synapse.cpp" />
+    <ClCompile Include="..\src\util\mapping.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

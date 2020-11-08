@@ -26,6 +26,6 @@ namespace kiv_ppr_db_connector {
 		bool valid = false;
 	} input;
 
-	input load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, int prediction_minutes);
+	input load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, unsigned prediction_minutes);
 
 }

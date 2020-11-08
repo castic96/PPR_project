@@ -124,11 +124,11 @@ size_t compute_changed_index(std::vector<int> segments_id) {
     }
 }
 
-int compute_limit(int prediction_minutes) {
+int compute_limit(unsigned prediction_minutes) {
     return (prediction_minutes / kiv_ppr_db_connector::MEASURE_INTERVAL_MINUTES) + kiv_ppr_db_connector::COUNT_OF_INPUT_VALUES;
 }
 
-kiv_ppr_db_connector::input kiv_ppr_db_connector::load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, int prediction_minutes) {
+kiv_ppr_db_connector::input kiv_ppr_db_connector::load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, unsigned prediction_minutes) {
     int return_code = 0;
     bool run_again;
     sqlite3* db_handler = reader->db_handler;

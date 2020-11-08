@@ -38,28 +38,28 @@ void kiv_ppr_neuron::feed_forward(kiv_ppr_neuron::neuron& neuron, kiv_ppr_neuron
 		sum += prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
 	}
 
-	neuron.output_value = kiv_ppr_neuron::transfer_function(sum);
+	neuron.output_value = kiv_ppr_neuron::transfer_function_hidden(sum);
 }
 
-double kiv_ppr_neuron::transfer_function(double value) {
+double kiv_ppr_neuron::transfer_function_hidden(double value) {
 	return tanh(value);
 }
 
-double kiv_ppr_neuron::transfer_function_derivative(double value) {
-	//return 1.0 - value * value;
-	return 1.0 - (tanh(value) * tanh(value));
+double kiv_ppr_neuron::transfer_function_hidden_der(double value) {
+	double hyperbolic_tan = tanh(value);
+	return 1.0 - (hyperbolic_tan * hyperbolic_tan);
 }
 
 void kiv_ppr_neuron::compute_output_gradient(kiv_ppr_neuron::neuron& neuron, double target_value) {
 	double delta = target_value - neuron.output_value;
 
-	neuron.gradient = delta * kiv_ppr_neuron::transfer_function_derivative(neuron.output_value);
+	neuron.gradient = delta * kiv_ppr_neuron::transfer_function_hidden_der(neuron.output_value);
 }
 
 void kiv_ppr_neuron::compute_hidden_gradient(kiv_ppr_neuron::neuron& neuron, const kiv_ppr_neuron::layer& next_layer) {
 	double dow = kiv_ppr_neuron::sum_dow(neuron, next_layer);
 
-	neuron.gradient = dow * kiv_ppr_neuron::transfer_function_derivative(neuron.output_value);
+	neuron.gradient = dow * kiv_ppr_neuron::transfer_function_hidden_der(neuron.output_value);
 }
 
 double kiv_ppr_neuron::sum_dow(kiv_ppr_neuron::neuron& neuron, const kiv_ppr_neuron::layer& next_layer) {
