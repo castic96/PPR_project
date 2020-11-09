@@ -18,7 +18,7 @@ kiv_ppr_db_connector::data_reader kiv_ppr_db_connector::new_reader(char* db_name
 
 bool kiv_ppr_db_connector::open_database(data_reader *reader) {
 
-    if (sqlite3_open(reader->db_name, &(reader->db_handler)) != SQLITE_OK) {
+    if (sqlite3_open_v2(reader->db_name, &(reader->db_handler), SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
         std::cout << "Cannot open database: " << sqlite3_errmsg(reader->db_handler) << std::endl;
         return false;
     }
