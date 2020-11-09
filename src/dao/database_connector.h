@@ -21,8 +21,8 @@ namespace kiv_ppr_db_connector {
 
 	typedef struct Input {
 		std::vector<double> values;
-		double expected_value;
-		int first_id;
+		double expected_value = 0.0;
+		int first_id = 0;
 		bool valid = false;
 	} input;
 

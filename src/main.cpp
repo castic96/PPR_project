@@ -6,6 +6,7 @@
 #include    <stdlib.h>
 #include    <string>
 #include    <cassert>
+#include    "tbb/parallel_for.h"
 #include    "constants.h"
 #include    "util/mapping.h"
 #include    "dao/database_connector.h"
@@ -84,20 +85,6 @@ void print_vector(std::string label, std::vector<double>& vector)
     std::cout << std::endl;
 }
 
-double calculate_relative_error(std::vector<double> result_values, double expected_value) {
-
-    unsigned result_index = 0;
-    for (unsigned i = 0; i < result_values.size(); i++) {
-        if (result_values[i] > result_values[result_index]) {
-            result_index = i;
-        }
-    }
-
-    double result_value = kiv_ppr_mapping::band_index_to_level(result_index);
-
-    return (std::abs(result_value - expected_value) / expected_value);
-}
-
 double calculate_total_error(std::vector<double> relative_errors_vector) {
     size_t vector_size = relative_errors_vector.size();
     double average_error = 0.0;
@@ -151,8 +138,7 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
     // Zpracovani vsech validnich vstupu
     int counter = 0;
     double relative_error = 0.0;
-    double total_error = 0.0;
-    std::vector<double> relative_errors_vector;
+    std::vector<double> total_errors;
 
     while (current_input.valid) {
 
@@ -169,19 +155,42 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         print_vector("Input values:", input_values);
         */
 
-        // Spusteni feed forward propagation
-        kiv_ppr_network::feed_forward_prop(neural_networks[0], input_values);
+        // Nacteni cilovych hodnot
+        target_values = get_target_values_vector(current_input.expected_value);
 
-        // Tisk vysledku feed forward propagation
-        kiv_ppr_network::get_results(neural_networks[0], result_values);
-        
+        tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
+            
+            // Spusteni feed forward propagation
+            kiv_ppr_network::feed_forward_prop(neural_networks[i], input_values);
+
+            // Spusteni back propagation
+            kiv_ppr_network::back_prop(neural_networks[i], target_values, current_input.expected_value);
+
+        });
+
         /*
-        print_vector("Result values:", result_values);
-        */
+        for (unsigned i = 0; i < neural_networks.size(); i++) {
 
-        relative_error = calculate_relative_error(result_values, current_input.expected_value);
-        relative_errors_vector.push_back(relative_error);
-        
+            // Spusteni feed forward propagation
+            kiv_ppr_network::feed_forward_prop(neural_networks[i], input_values);
+
+            // Tisk vysledku feed forward propagation
+            /*
+            kiv_ppr_network::get_results(neural_networks[0], result_values);
+            */
+            /*
+            print_vector("Result values:", result_values);
+            */
+
+            /*
+            relative_error = calculate_relative_error(result_values, current_input.expected_value);
+            relative_errors_vector.push_back(relative_error);
+            
+
+            // Spusteni back propagation
+            kiv_ppr_network::back_prop(neural_networks[i], target_values, current_input.expected_value);
+        } */
+
         // TODO: smazat, jen pro test, jestli funguje...
         /*
         double sum = 0.0;
@@ -191,8 +200,6 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         std::cout << "SUM: " << sum << std::endl;
         */
 
-        // Nacteni cilovych hodnot
-        target_values = get_target_values_vector(current_input.expected_value);
         /*
         print_vector("Target values:", target_values);
         std::cout << "Expected value: " << current_input.expected_value << std::endl;
@@ -201,9 +208,6 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         /*
         assert(target_values.size() == topology.back());
         */
-
-        // Spusteni back propagation
-        kiv_ppr_network::back_prop(neural_networks[0], target_values);
 
         /*
         std::cout << "Net recent average error: "
@@ -216,13 +220,33 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         current_input = kiv_ppr_db_connector::load_next(&reader, current_input.first_id, predicted_minutes);
     }
 
-    total_error = calculate_total_error(relative_errors_vector);
-    std::cout << "Count of loops: " << counter << std::endl;
-    std::cout << "TOTAL ERROR: " << total_error << std::endl;
+    for (unsigned i = 0; i < neural_networks.size(); i++) {
+        total_errors.push_back(calculate_total_error(neural_networks[i].relative_errors_vector));
+    }
+
+    unsigned min_total_error_index = 0;
+
+    for (unsigned i = 0; i < total_errors.size(); i++) {
+        if (total_errors[i] < total_errors[min_total_error_index]) {
+            min_total_error_index = i;
+        }
+    }
+
+    // Vypis vsech chyb
+    std::cout << "TOTAL ERRORS: ";
+    for (unsigned i = 0; i < total_errors.size(); i++) {
+        std::cout << total_errors[i] << " ";
+    }
+    std::cout << std::endl;
+
+    // Vypis chyby pro nejlepsi sit
+    std::cout 
+        << "BEST TOTAL ERROR: " 
+        << total_errors[min_total_error_index]
+        << ", NETWORK INDEX: " << min_total_error_index
+        << std::endl;
 
     kiv_ppr_db_connector::close_database(&reader);
-
-
 
 
     /*

@@ -1,6 +1,7 @@
 #include<vector>
 #include<cassert>
 #include "network.h"
+#include "../util/mapping.h"
 
 
 kiv_ppr_network::network kiv_ppr_network::new_network(const std::vector<unsigned>& topology) {
@@ -65,13 +66,16 @@ void kiv_ppr_network::feed_forward_prop(kiv_ppr_network::network &network, const
 
 }
 
-void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::vector<double>& target_values) {
+void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::vector<double>& target_values, double expected_value) {
+
+	// Vypocitani relativni chyby a pridani do vektoru chyb v siti	
+	std::vector<double> result_values;
+	kiv_ppr_network::get_results(network, result_values);
+	double relative_error = kiv_ppr_network::calculate_relative_error(result_values, expected_value);
+	network.relative_errors_vector.push_back(relative_error);
 
 	// Vypoètení kumulativní chyby (RMS výstupních chyb)
-	// TODO: možná zmìnit - máme optimalizovat dle relativní chyby a ne rozdílu !!! viz poznámky!!!
-	// abs(vypoèítaná hodnota - namìøená hodnota)/namìøená hodnota - možná zamìnit za výpoèet rozdílu
-	
-	
+	// TODO: asi k nièemu, pak odstranit
 	double standard_error = 0.0;
 	kiv_ppr_neuron::layer& output_layer = network.layers.back();
 
@@ -129,11 +133,24 @@ double kiv_ppr_network::risk_function(const double bg) {
 }
 
 void kiv_ppr_network::get_results(kiv_ppr_network::network& network, std::vector<double>& result_values) {
-	// TODO: predelat a volat zde Band_index_to_level
 	result_values.clear();
 
 	for (unsigned i = 0; i < network.layers.back().neurons.size() - 1; i++) {
 		result_values.push_back(network.layers.back().neurons[i].output_value);
 	}
 
+}
+
+double kiv_ppr_network::calculate_relative_error(std::vector<double> result_values, double expected_value) {
+
+	unsigned result_index = 0;
+	for (unsigned i = 0; i < result_values.size(); i++) {
+		if (result_values[i] > result_values[result_index]) {
+			result_index = i;
+		}
+	}
+
+	double result_value = kiv_ppr_mapping::band_index_to_level(result_index);
+
+	return (std::abs(result_value - expected_value) / expected_value);
 }

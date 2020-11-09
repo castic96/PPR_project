@@ -122,6 +122,8 @@ size_t compute_changed_index(std::vector<int> segments_id) {
             return i;
         }
     }
+
+    return 0;
 }
 
 int compute_limit(unsigned prediction_minutes) {
