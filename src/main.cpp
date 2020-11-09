@@ -84,6 +84,43 @@ void print_vector(std::string label, std::vector<double>& vector)
     std::cout << std::endl;
 }
 
+double calculate_relative_error(std::vector<double> result_values, double expected_value) {
+
+    unsigned result_index = 0;
+    for (unsigned i = 0; i < result_values.size(); i++) {
+        if (result_values[i] > result_values[result_index]) {
+            result_index = i;
+        }
+    }
+
+    double result_value = kiv_ppr_mapping::band_index_to_level(result_index);
+
+    return (std::abs(result_value - expected_value) / expected_value);
+}
+
+double calculate_total_error(std::vector<double> relative_errors_vector) {
+    size_t vector_size = relative_errors_vector.size();
+    double average_error = 0.0;
+    double standard_deviation = 0.0;
+    double sum = 0.0;
+
+    for (unsigned i = 0; i < vector_size; i++) {
+        sum += relative_errors_vector[i];
+    }
+
+    average_error = sum / (double)vector_size;
+
+    sum = 0.0;
+
+    for (unsigned i = 0; i < vector_size; i++) {
+        sum += pow(relative_errors_vector[i] - average_error, 2);
+    }
+
+    standard_deviation = sum / (double)vector_size;
+
+    return average_error + standard_deviation;
+}
+
 void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     // Otevreni databaze
@@ -113,6 +150,10 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
     
     // Zpracovani vsech validnich vstupu
     int counter = 0;
+    double relative_error = 0.0;
+    double total_error = 0.0;
+    std::vector<double> relative_errors_vector;
+
     while (current_input.valid) {
 
         // Tisk poradi
@@ -129,6 +170,12 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         // Tisk vysledku feed forward propagation
         kiv_ppr_network::get_results(neural_networks[0], result_values);
         print_vector("Result values:", result_values);
+
+        relative_error = calculate_relative_error(result_values, current_input.expected_value);
+        relative_errors_vector.push_back(relative_error);
+        total_error = calculate_total_error(relative_errors_vector);
+
+        std::cout << "TOTAL ERROR: " << total_error << std::endl;
         
         // TODO: smazat, jen pro test, jestli funguje...
         /*

@@ -67,8 +67,10 @@ double kiv_ppr_neuron::transfer_function_hidden_der(double value) {
 }
 
 double kiv_ppr_neuron::transfer_function_output_der(double value, double sum) {
-	double f = exp(value) / sum;
-	return (f * (1 - f));
+	// TODO: prozatim pouziju derivaci tangentu..
+	/*double f = exp(value) / sum;
+	return (f * (1 - f));*/
+	return kiv_ppr_neuron::transfer_function_hidden_der(value);
 }
 
 void kiv_ppr_neuron::compute_output_gradient(kiv_ppr_neuron::neuron& neuron, double target_value, double sum) {

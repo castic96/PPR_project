@@ -72,24 +72,18 @@ void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::ve
 	// abs(vypoèítaná hodnota - namìøená hodnota)/namìøená hodnota - možná zamìnit za výpoèet rozdílu
 	
 	
-	double standard_error = 0.0; 
-	double relative_error = 0.0;
-
+	double standard_error = 0.0;
 	kiv_ppr_neuron::layer& output_layer = network.layers.back();
-	//network.standard_error = 0.0;
 
 	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
 		double delta = target_values[i] - output_layer.neurons[i].output_value;
 
 		standard_error += delta * delta;
-		//zkontrolovat - èagy to má naopak
-		relative_error += abs(output_layer.neurons[i].output_value - target_values[i]) / target_values[i];
 	}
-	//TODO: tím výpoètem si fakt nejsem jistej..
-	standard_error /= output_layer.neurons.size() - 1;
-	relative_error /= output_layer.neurons.size() - 1;
 
-	network.error = sqrt(standard_error) + relative_error;
+	standard_error /= output_layer.neurons.size() - 1;
+
+	network.error = sqrt(standard_error);
 
 	network.recent_average_error =
 		(network.recent_average_error * RECENT_AVERAGE_SMOOTHING_FACTOR + network.error) /
