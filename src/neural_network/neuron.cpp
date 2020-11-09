@@ -29,7 +29,7 @@ double kiv_ppr_neuron::get_random_weight() {
 	return distribution(generator);
 }
 
-void kiv_ppr_neuron::feed_forward(kiv_ppr_neuron::neuron& neuron, kiv_ppr_neuron::layer& previous_layer) {
+void kiv_ppr_neuron::feed_forward_hidden(kiv_ppr_neuron::neuron& neuron, kiv_ppr_neuron::layer& previous_layer) {
 	double sum = 0.0;
 
 	for (unsigned i = 0; i < previous_layer.neurons.size(); i++) {
@@ -41,8 +41,24 @@ void kiv_ppr_neuron::feed_forward(kiv_ppr_neuron::neuron& neuron, kiv_ppr_neuron
 	neuron.output_value = kiv_ppr_neuron::transfer_function_hidden(sum);
 }
 
+void kiv_ppr_neuron::feed_forward_output(kiv_ppr_neuron::neuron& neuron, kiv_ppr_neuron::layer& previous_layer) {
+	double sum = 0.0;
+
+	for (unsigned i = 0; i < previous_layer.neurons.size(); i++) {
+		kiv_ppr_neuron::neuron prev_neuron = previous_layer.neurons[i];
+
+		sum += prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
+	}
+
+	neuron.output_value = kiv_ppr_neuron::transfer_function_output(sum);
+}
+
 double kiv_ppr_neuron::transfer_function_hidden(double value) {
 	return tanh(value);
+}
+
+double kiv_ppr_neuron::transfer_function_output(double value) {
+	return exp(value);
 }
 
 double kiv_ppr_neuron::transfer_function_hidden_der(double value) {
@@ -50,10 +66,15 @@ double kiv_ppr_neuron::transfer_function_hidden_der(double value) {
 	return 1.0 - (hyperbolic_tan * hyperbolic_tan);
 }
 
-void kiv_ppr_neuron::compute_output_gradient(kiv_ppr_neuron::neuron& neuron, double target_value) {
+double kiv_ppr_neuron::transfer_function_output_der(double value, double sum) {
+	double f = exp(value) / sum;
+	return (f * (1 - f));
+}
+
+void kiv_ppr_neuron::compute_output_gradient(kiv_ppr_neuron::neuron& neuron, double target_value, double sum) {
 	double delta = target_value - neuron.output_value;
 
-	neuron.gradient = delta * kiv_ppr_neuron::transfer_function_hidden_der(neuron.output_value);
+	neuron.gradient = delta * kiv_ppr_neuron::transfer_function_output_der(neuron.output_value, sum);
 }
 
 void kiv_ppr_neuron::compute_hidden_gradient(kiv_ppr_neuron::neuron& neuron, const kiv_ppr_neuron::layer& next_layer) {

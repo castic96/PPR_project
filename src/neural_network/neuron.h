@@ -21,10 +21,13 @@ namespace kiv_ppr_neuron {
 
 	neuron new_neuron(unsigned number_of_outputs, unsigned neuron_index);
 	double get_random_weight();
-	void feed_forward(neuron &neuron, kiv_ppr_neuron::layer &previous_layer);
+	void feed_forward_hidden(neuron &neuron, kiv_ppr_neuron::layer &previous_layer);
+	void feed_forward_output(neuron& neuron, kiv_ppr_neuron::layer& previous_layer);
 	double transfer_function_hidden(double value);
+	double transfer_function_output(double value);
 	double transfer_function_hidden_der(double value);
-	void compute_output_gradient(neuron& neuron, double target_value);
+	double transfer_function_output_der(double value, double sum);
+	void compute_output_gradient(neuron& neuron, double target_value, double sum);
 	void compute_hidden_gradient(neuron& neuron, const layer& next_layer);
 	void update_input_weight(neuron& neuron, layer& previous_layer);
 	double sum_dow(neuron& neuron, const layer& next_layer);

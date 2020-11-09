@@ -129,6 +129,15 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         // Tisk vysledku feed forward propagation
         kiv_ppr_network::get_results(neural_networks[0], result_values);
         print_vector("Result values:", result_values);
+        
+        // TODO: smazat, jen pro test, jestli funguje...
+        /*
+        double sum = 0.0;
+        for (int i = 0; i < result_values.size(); i++) {
+            sum += result_values[i];
+        }
+        std::cout << "SUM: " << sum << std::endl;
+        */
 
         // Nacteni cilovych hodnot
         target_values = get_target_values_vector(current_input.expected_value);

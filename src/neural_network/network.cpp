@@ -38,14 +38,29 @@ void kiv_ppr_network::feed_forward_prop(kiv_ppr_network::network &network, const
 		network.layers[0].neurons[i].output_value = risk_function(input_values[i]);
 	}
 
-	// Spusteni forward propagation
-	for (unsigned i = 1; i < network.layers.size(); i++) {
+	// Spusteni forward propagation pro skryte vrstvy
+	for (unsigned i = 1; i < network.layers.size() - 1; i++) {
 
 		kiv_ppr_neuron::layer &previous_layer = network.layers[i - 1];
 
 		for (unsigned j = 0; j < network.layers[i].neurons.size() - 1; j++) {
-			kiv_ppr_neuron::feed_forward(network.layers[i].neurons[j], previous_layer);
+			kiv_ppr_neuron::feed_forward_hidden(network.layers[i].neurons[j], previous_layer);
 		}
+	}
+
+	// Spusteni forward propagation pro vystupni vrstvu
+	unsigned last_layer_index = network.layers.size() - 1;
+	double sum = 0.0;
+
+	kiv_ppr_neuron::layer& previous_layer = network.layers[last_layer_index - 1];
+
+	for (unsigned i = 0; i < network.layers[last_layer_index].neurons.size() - 1; i++) {
+		kiv_ppr_neuron::feed_forward_output(network.layers[last_layer_index].neurons[i], previous_layer);
+		sum += network.layers[last_layer_index].neurons[i].output_value;
+	}
+
+	for (unsigned i = 0; i < network.layers[last_layer_index].neurons.size() - 1; i++) {
+		network.layers[last_layer_index].neurons[i].output_value /= sum;
 	}
 
 }
@@ -81,9 +96,15 @@ void kiv_ppr_network::back_prop(kiv_ppr_network::network& network, const std::ve
 		(RECENT_AVERAGE_SMOOTHING_FACTOR + 1.0);
 
 	// Spocitani gradientu vystupni vrstvy
+	double sum = 0.0;
 	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
-		kiv_ppr_neuron::compute_output_gradient(output_layer.neurons[i], target_values[i]);
+		sum += exp(output_layer.neurons[i].output_value);
 	}
+
+	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
+		kiv_ppr_neuron::compute_output_gradient(output_layer.neurons[i], target_values[i], sum);
+	}
+
 
 	//Spocitani gradientu skrytych vrstev
 	for (unsigned i = network.layers.size() - 2; i > 0; i--) {
