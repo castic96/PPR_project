@@ -3,8 +3,8 @@
 #include<vector>
 #include "synapse.h"
 
-#define		ETA			0.15	// [0.0 - 1.0] rychlost uèení sítì
-#define		ALPHA		0.5		// [0.0 - n] multiplikátor poslední zmìny váhy (momentum)
+#define		ETA			0.05	// [0.0 - 1.0] rychlost uèení sítì
+#define		ALPHA		0.1		// [0.0 - n] multiplikátor poslední zmìny váhy (momentum)
 
 namespace kiv_ppr_neuron {
 

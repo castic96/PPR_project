@@ -158,24 +158,29 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
         // Tisk poradi
         counter++;
+        /*
         std::cout << counter << ": " << std::endl;
+        */
 
         // Nacteni vstupnich hodnot
         input_values = current_input.values;
+        
+        /*
         print_vector("Input values:", input_values);
+        */
 
         // Spusteni feed forward propagation
         kiv_ppr_network::feed_forward_prop(neural_networks[0], input_values);
 
         // Tisk vysledku feed forward propagation
         kiv_ppr_network::get_results(neural_networks[0], result_values);
+        
+        /*
         print_vector("Result values:", result_values);
+        */
 
         relative_error = calculate_relative_error(result_values, current_input.expected_value);
         relative_errors_vector.push_back(relative_error);
-        total_error = calculate_total_error(relative_errors_vector);
-
-        std::cout << "TOTAL ERROR: " << total_error << std::endl;
         
         // TODO: smazat, jen pro test, jestli funguje...
         /*
@@ -188,22 +193,34 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
         // Nacteni cilovych hodnot
         target_values = get_target_values_vector(current_input.expected_value);
+        /*
         print_vector("Target values:", target_values);
         std::cout << "Expected value: " << current_input.expected_value << std::endl;
+        */
 
+        /*
         assert(target_values.size() == topology.back());
+        */
 
         // Spusteni back propagation
         kiv_ppr_network::back_prop(neural_networks[0], target_values);
 
+        /*
         std::cout << "Net recent average error: "
             << neural_networks[0].recent_average_error << std::endl;
 
         std::cout << "----------------------------------------------" << std::endl;
+        */
 
         // Nacteni dalsiho vstupu
         current_input = kiv_ppr_db_connector::load_next(&reader, current_input.first_id, predicted_minutes);
     }
+
+    total_error = calculate_total_error(relative_errors_vector);
+    std::cout << "Count of loops: " << counter << std::endl;
+    std::cout << "TOTAL ERROR: " << total_error << std::endl;
+
+    kiv_ppr_db_connector::close_database(&reader);
 
 
 
