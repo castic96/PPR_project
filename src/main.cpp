@@ -103,7 +103,7 @@ double calculate_total_error(std::vector<double> relative_errors_vector) {
         sum += pow(relative_errors_vector[i] - average_error, 2);
     }
 
-    standard_deviation = sum / (double)vector_size;
+    standard_deviation = sqrt(sum / (double)vector_size);
 
     return average_error + standard_deviation;
 }
