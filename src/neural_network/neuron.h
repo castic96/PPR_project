@@ -8,29 +8,29 @@
 
 namespace kiv_ppr_neuron {
 
-	typedef struct Neuron {
+	struct TNeuron {
 		double output_value;
-		std::vector<kiv_ppr_synapse::synapse> output_weights;
+		std::vector<kiv_ppr_synapse::TSynapse> output_weights;
 		unsigned neuron_index;
-		double gradient;
-	} neuron;
+		double gradient = 0.0;
+	};
 
-	typedef struct Layer {
-		std::vector<kiv_ppr_neuron::neuron> neurons;
-	} layer;
+	struct TLayer {
+		std::vector<kiv_ppr_neuron::TNeuron> neurons;
+	};
 
-	neuron new_neuron(unsigned number_of_outputs, unsigned neuron_index);
-	double get_random_weight();
-	void feed_forward_hidden(neuron &neuron, kiv_ppr_neuron::layer &previous_layer);
-	void feed_forward_output(neuron& neuron, kiv_ppr_neuron::layer& previous_layer);
-	double transfer_function_hidden(double value);
-	double transfer_function_output(double value);
-	double transfer_function_hidden_der(double value);
-	double transfer_function_output_der(double value, double sum);
-	void compute_output_gradient(neuron& neuron, double target_value, double sum);
-	void compute_hidden_gradient(neuron& neuron, const layer& next_layer);
-	void update_input_weight(neuron& neuron, layer& previous_layer);
-	double sum_dow(neuron& neuron, const layer& next_layer);
+	TNeuron New_Neuron(unsigned number_of_outputs, unsigned neuron_index);
+	double Get_Random_Weight();
+	void Feed_Forward_Hidden(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
+	void Feed_Forward_Output(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
+	double Transfer_Function_Hidden(double value);
+	double Transfer_Function_Output(double value);
+	double Transfer_Function_Hidden_Der(double value);
+	double Transfer_Function_Output_Der(double value, double sum);
+	void Compute_Output_Gradient(TNeuron& neuron, double target_value, double sum);
+	void Compute_Hidden_Gradient(TNeuron& neuron, const TLayer& next_layer);
+	void Update_Input_Weight(TNeuron& neuron, TLayer& previous_layer);
+	double Sum_Dow(TNeuron& neuron, const TLayer& next_layer);
 
-	layer new_layer();
+	TLayer New_Layer();
 }

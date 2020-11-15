@@ -1,6 +1,3 @@
-// BloodGlucoseLevelPredictionChallenge.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include    <iostream>
 #include    <stdio.h>
 #include    <stdlib.h>
@@ -47,11 +44,11 @@ void create_topology(std::vector<unsigned> &topology) {
     topology.push_back(OUTPUT_LAYER_NEURONS_COUNT);
 }
 
-void create_neural_networks(std::vector<kiv_ppr_network::network>& neural_networks, std::vector<unsigned>& topology) {
+void create_neural_networks(std::vector<kiv_ppr_network::TNetwork>& neural_networks, std::vector<unsigned>& topology) {
     neural_networks.clear();
 
     for (int i = 0; i < NEURAL_NETWORKS_COUNT; i++) {
-        neural_networks.push_back(kiv_ppr_network::new_network(topology));
+        neural_networks.push_back(kiv_ppr_network::New_Network(topology));
     }
 
 }
@@ -67,7 +64,7 @@ std::vector<double> get_target_values_vector(double expected_value) {
         target_values.push_back(0);
     }
 
-    expected_index = kiv_ppr_mapping::band_level_to_index(expected_value);
+    expected_index = kiv_ppr_mapping::Band_Level_To_Index(expected_value);
 
     target_values[expected_index] = 1;
 
@@ -111,9 +108,9 @@ double calculate_total_error(std::vector<double> relative_errors_vector) {
 void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     // Otevreni databaze
-    kiv_ppr_db_connector::data_reader reader = kiv_ppr_db_connector::new_reader(db_name);
+    kiv_ppr_db_connector::TData_Reader reader = kiv_ppr_db_connector::New_Reader(db_name);
    
-    if (!kiv_ppr_db_connector::open_database(&reader)) {
+    if (!kiv_ppr_db_connector::Open_Database(reader)) {
         exit(EXIT_FAILURE);
     }
 
@@ -122,12 +119,12 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
     create_topology(topology);
 
     // Vytvoreni n neuronovych siti s danou topologii
-    std::vector<kiv_ppr_network::network> neural_networks;
+    std::vector<kiv_ppr_network::TNetwork> neural_networks;
     create_neural_networks(neural_networks, topology);
 
     // Nacteni jednoho vstupu
-    kiv_ppr_db_connector::input current_input;
-    current_input = kiv_ppr_db_connector::load_next(&reader, START_ID, predicted_minutes);
+    kiv_ppr_db_connector::TInput current_input;
+    current_input = kiv_ppr_db_connector::Load_Next(reader, START_ID, predicted_minutes);
 
     // Vytvoreni vektoru pro vstupni a ocekavane (cilove) hodnoty
     std::vector<double> input_values;
@@ -144,16 +141,9 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
         // Tisk poradi
         counter++;
-        /*
-        std::cout << counter << ": " << std::endl;
-        */
 
         // Nacteni vstupnich hodnot
         input_values = current_input.values;
-        
-        /*
-        print_vector("Input values:", input_values);
-        */
 
         // Nacteni cilovych hodnot
         target_values = get_target_values_vector(current_input.expected_value);
@@ -161,63 +151,15 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
             
             // Spusteni feed forward propagation
-            kiv_ppr_network::feed_forward_prop(neural_networks[i], input_values);
+            kiv_ppr_network::Feed_Forward_Prop(neural_networks[i], input_values);
 
             // Spusteni back propagation
-            kiv_ppr_network::back_prop(neural_networks[i], target_values, current_input.expected_value);
+            kiv_ppr_network::Back_Prop(neural_networks[i], target_values, current_input.expected_value);
 
         });
 
-        /*
-        for (unsigned i = 0; i < neural_networks.size(); i++) {
-
-            // Spusteni feed forward propagation
-            kiv_ppr_network::feed_forward_prop(neural_networks[i], input_values);
-
-            // Tisk vysledku feed forward propagation
-            /*
-            kiv_ppr_network::get_results(neural_networks[0], result_values);
-            */
-            /*
-            print_vector("Result values:", result_values);
-            */
-
-            /*
-            relative_error = calculate_relative_error(result_values, current_input.expected_value);
-            relative_errors_vector.push_back(relative_error);
-            
-
-            // Spusteni back propagation
-            kiv_ppr_network::back_prop(neural_networks[i], target_values, current_input.expected_value);
-        } */
-
-        // TODO: smazat, jen pro test, jestli funguje...
-        /*
-        double sum = 0.0;
-        for (int i = 0; i < result_values.size(); i++) {
-            sum += result_values[i];
-        }
-        std::cout << "SUM: " << sum << std::endl;
-        */
-
-        /*
-        print_vector("Target values:", target_values);
-        std::cout << "Expected value: " << current_input.expected_value << std::endl;
-        */
-
-        /*
-        assert(target_values.size() == topology.back());
-        */
-
-        /*
-        std::cout << "Net recent average error: "
-            << neural_networks[0].recent_average_error << std::endl;
-
-        std::cout << "----------------------------------------------" << std::endl;
-        */
-
         // Nacteni dalsiho vstupu
-        current_input = kiv_ppr_db_connector::load_next(&reader, current_input.first_id, predicted_minutes);
+        current_input = kiv_ppr_db_connector::Load_Next(reader, current_input.first_id, predicted_minutes);
     }
 
     for (unsigned i = 0; i < neural_networks.size(); i++) {
@@ -246,7 +188,7 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
         << ", NETWORK INDEX: " << min_total_error_index
         << std::endl;
 
-    kiv_ppr_db_connector::close_database(&reader);
+    kiv_ppr_db_connector::Close_Database(reader);
 
 
     /*
@@ -257,9 +199,6 @@ void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     }
     */
-
-
-
 
 }
 
@@ -275,33 +214,3 @@ int main(int argc, char** argv)
     run(predicted_minutes, db_name, weights_file_name);
 
 }
-
-/*
-void exec_data_from_db() {
-    kiv_ppr_db_connector::data_reader reader = kiv_ppr_db_connector::new_reader("..\\..\\data\\asc2018.sqlite");
-
-    kiv_ppr_db_connector::open_database(&reader);
-    //kiv_ppr_db_connector::load_data(&reader);
-    int counter = 0;
-    kiv_ppr_db_connector::input current_input = kiv_ppr_db_connector::load_next(&reader, START_ID, PREDICTION_MINUTES);
-
-    while (current_input.valid) {
-        counter++;
-        std::cout << counter << ": " << std::endl;
-
-        for (size_t i = 0; i < current_input.values.size(); i++) {
-            std::cout << "\t" << current_input.values[i] << std::endl;
-        }
-
-        std::cout << "\t exp: " << current_input.expected_value << std::endl;
-
-        std::cout << "-------------------------" << std::endl;
-
-        current_input = kiv_ppr_db_connector::load_next(&reader, current_input.first_id, PREDICTION_MINUTES);
-    }
-
-    std::cout << "------------ END ----------- " << std::endl;
-
-
-    kiv_ppr_db_connector::close_database(&reader);
-}*/

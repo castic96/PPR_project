@@ -5,7 +5,7 @@
 #define     HIDDEN1_LAYER_NEURONS_COUNT     16
 #define     HIDDEN2_LAYER_NEURONS_COUNT     26
 #define     OUTPUT_LAYER_NEURONS_COUNT      32
-#define     NEURAL_NETWORKS_COUNT           1
+#define     NEURAL_NETWORKS_COUNT           20
 
 namespace kiv_ppr_constants {
 

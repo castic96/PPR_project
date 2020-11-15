@@ -1,6 +1,6 @@
 #include "mapping.h"
 
-double kiv_ppr_mapping::band_index_to_level(const size_t index) {
+double kiv_ppr_mapping::Band_Index_To_Level(const size_t index) {
     if (index == 0) {
         return kiv_ppr_constants::Low_Threshold - kiv_ppr_constants::Half_Band_Size;
     }
@@ -13,7 +13,7 @@ double kiv_ppr_mapping::band_index_to_level(const size_t index) {
         * kiv_ppr_constants::Band_Size + kiv_ppr_constants::Half_Band_Size;
 }
 
-size_t kiv_ppr_mapping::band_level_to_index(double expected_value) {
+size_t kiv_ppr_mapping::Band_Level_To_Index(double expected_value) {
 
     // Vraci index prvniho neuronu
     if (expected_value <= kiv_ppr_constants::Low_Threshold) {

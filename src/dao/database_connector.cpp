@@ -6,9 +6,9 @@
 
 #include "database_connector.h"
 
-kiv_ppr_db_connector::data_reader kiv_ppr_db_connector::new_reader(char* db_name) {
+kiv_ppr_db_connector::TData_Reader kiv_ppr_db_connector::New_Reader(char* db_name) {
 
-    kiv_ppr_db_connector::data_reader new_reader;
+    kiv_ppr_db_connector::TData_Reader new_reader;
 
     new_reader.db_name = db_name;
 
@@ -16,10 +16,10 @@ kiv_ppr_db_connector::data_reader kiv_ppr_db_connector::new_reader(char* db_name
 }
 
 
-bool kiv_ppr_db_connector::open_database(data_reader *reader) {
+bool kiv_ppr_db_connector::Open_Database(kiv_ppr_db_connector::TData_Reader &reader) {
 
-    if (sqlite3_open_v2(reader->db_name, &(reader->db_handler), SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
-        std::cout << "Cannot open database: " << sqlite3_errmsg(reader->db_handler) << std::endl;
+    if (sqlite3_open_v2(reader.db_name, &(reader.db_handler), SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
+        std::cout << "Cannot open database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
         return false;
     }
 
@@ -31,10 +31,10 @@ bool kiv_ppr_db_connector::open_database(data_reader *reader) {
 
 }
 
-bool kiv_ppr_db_connector::close_database(data_reader* reader) {
+bool kiv_ppr_db_connector::Close_Database(kiv_ppr_db_connector::TData_Reader& reader) {
 
-    if (sqlite3_close(reader->db_handler) != SQLITE_OK) {
-        std::cout << "Cannot close database: " << sqlite3_errmsg(reader->db_handler) << std::endl;
+    if (sqlite3_close(reader.db_handler) != SQLITE_OK) {
+        std::cout << "Cannot close database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
         return false;
     }
 
@@ -46,9 +46,9 @@ bool kiv_ppr_db_connector::close_database(data_reader* reader) {
 
 }
 
-bool kiv_ppr_db_connector::load_data(data_reader* reader) {
+bool kiv_ppr_db_connector::Load_Data(kiv_ppr_db_connector::TData_Reader& reader) {
     int return_code = 0;
-    sqlite3* db_handler = reader->db_handler;
+    sqlite3* db_handler = reader.db_handler;
     sqlite3_stmt *statement;
     const char *sql_command = "select measuredat, ist from measuredvalue where segmentid = ? and id >= ? order by id limit ?;";
 
@@ -95,8 +95,8 @@ bool kiv_ppr_db_connector::load_data(data_reader* reader) {
 
 }
 
-kiv_ppr_db_connector::input create_new_input(std::vector<int> ids, std::vector<double> values, bool is_valid) {
-    kiv_ppr_db_connector::input new_input;
+kiv_ppr_db_connector::TInput create_new_input(std::vector<int> ids, std::vector<double> values, bool is_valid) {
+    kiv_ppr_db_connector::TInput new_input;
 
     if (ids.empty() || !is_valid) {
         new_input.valid = false;
@@ -130,10 +130,10 @@ int compute_limit(unsigned prediction_minutes) {
     return (prediction_minutes / kiv_ppr_db_connector::MEASURE_INTERVAL_MINUTES) + kiv_ppr_db_connector::COUNT_OF_INPUT_VALUES;
 }
 
-kiv_ppr_db_connector::input kiv_ppr_db_connector::load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, unsigned prediction_minutes) {
+kiv_ppr_db_connector::TInput kiv_ppr_db_connector::Load_Next(kiv_ppr_db_connector::TData_Reader& reader, int last_used_first_id, unsigned prediction_minutes) {
     int return_code = 0;
     bool run_again;
-    sqlite3* db_handler = reader->db_handler;
+    sqlite3* db_handler = reader.db_handler;
     sqlite3_stmt* statement;
     
     std::vector<int> ids;

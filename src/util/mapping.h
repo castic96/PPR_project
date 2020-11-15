@@ -3,6 +3,6 @@
 #include "../constants.h"
 
 namespace kiv_ppr_mapping {
-	double band_index_to_level(const size_t index);
-	size_t band_level_to_index(double expected_value);
+	double Band_Index_To_Level(const size_t index);
+	size_t Band_Level_To_Index(double expected_value);
 }

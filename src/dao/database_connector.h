@@ -8,24 +8,24 @@ namespace kiv_ppr_db_connector {
 	const int COUNT_OF_INPUT_VALUES = 8;
 	const int MEASURE_INTERVAL_MINUTES = 5;
 
-	typedef struct Data_Reader {
+	struct TData_Reader {
 		char *db_name;
 		sqlite3 *db_handler;
-	} data_reader;
+	};
 
-	data_reader new_reader(char* db_name);
-	bool open_database(data_reader *reader);
-	bool close_database(data_reader* reader);
-	bool load_data(data_reader* reader);
+	TData_Reader New_Reader(char* db_name);
+	bool Open_Database(TData_Reader& reader);
+	bool Close_Database(TData_Reader& reader);
+	bool Load_Data(TData_Reader& reader);
 
 
-	typedef struct Input {
+	struct TInput {
 		std::vector<double> values;
 		double expected_value = 0.0;
 		int first_id = 0;
 		bool valid = false;
-	} input;
+	};
 
-	input load_next(kiv_ppr_db_connector::data_reader* reader, int last_used_first_id, unsigned prediction_minutes);
+	TInput Load_Next(TData_Reader& reader, int last_used_first_id, unsigned prediction_minutes);
 
 }
