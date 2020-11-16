@@ -156,19 +156,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\dao\database_connector.h" />
-    <ClInclude Include="..\src\neural_network\network.h" />
-    <ClInclude Include="..\src\neural_network\neuron.h" />
-    <ClInclude Include="..\src\neural_network\synapse.h" />
-    <ClInclude Include="..\src\util\mapping.h" />
+    <ClInclude Include="..\src\smp\neural_network\network.h" />
+    <ClInclude Include="..\src\smp\neural_network\neuron.h" />
+    <ClInclude Include="..\src\smp\neural_network\synapse.h" />
+    <ClInclude Include="..\src\smp\util\mapping.h" />
+    <ClInclude Include="..\src\smp\util\input_parser.h" />
     <ClInclude Include="..\src\constants.h" />
+    <ClInclude Include="..\src\smp\processor_smp.h" />
+    <ClInclude Include="..\src\gpu\processor_gpu.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\dao\database_connector.cpp" />
-    <ClCompile Include="..\src\neural_network\network.cpp" />
-    <ClCompile Include="..\src\neural_network\neuron.cpp" />
-    <ClCompile Include="..\src\neural_network\synapse.cpp" />
-    <ClCompile Include="..\src\util\mapping.cpp" />
+    <ClCompile Include="..\src\smp\neural_network\network.cpp" />
+    <ClCompile Include="..\src\smp\neural_network\neuron.cpp" />
+    <ClCompile Include="..\src\smp\neural_network\synapse.cpp" />
+    <ClCompile Include="..\src\smp\util\mapping.cpp" />
+    <ClCompile Include="..\src\smp\util\input_parser.cpp" />
+    <ClCompile Include="..\src\smp\processor_smp.cpp" />
+    <ClCompile Include="..\src\gpu\processor_gpu.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
