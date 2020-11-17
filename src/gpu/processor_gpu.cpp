@@ -35,6 +35,43 @@ size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_v
     return 0;
 }
 
+void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
+    std::vector<float>& input_values, std::vector<float>& expected_values, unsigned predicted_minutes) {
+    unsigned index = 0;
+    bool run_again = false;
+
+    int prediction_places = Compute_Prediction_Places(predicted_minutes);
+    int limit = COUNT_OF_INPUT_VALUES + prediction_places;
+
+    while (true) {
+
+        do {
+            run_again = false;
+
+            if (index + limit > input_data.size()) {
+                return;
+            }
+
+            if (input_data[index].segment_id != input_data[index + limit - 1].segment_id) {
+                index = Compute_Changed_Index(input_data, index, limit);
+                run_again = true;
+            }
+
+        } while (run_again);
+
+        for (unsigned i = index; i < index + COUNT_OF_INPUT_VALUES; i++) {
+            input_values.push_back((float)input_data[i].ist);
+        }
+
+        expected_values.push_back((float)input_data[index + limit - 1].ist);
+
+        index++;
+    }
+
+}
+
+
+/*
 void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data, 
     std::vector<float>& input_values, std::vector<float>& expected_values, unsigned predicted_minutes) {
     unsigned index = 0;
@@ -81,6 +118,7 @@ void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
     }
 
 }
+*/
 
 void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
@@ -105,5 +143,17 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
     Convert_Values_To_Buff(input_values, expected_values, input_values_buff, expected_values_buff);
 
     // Zde bych mel mit korektne naplnene buffery
+
+
+
+
+
+
+
+
+
+    // Uvolneni pameti bufferu
+    free(input_values_buff);
+    free(expected_values_buff);
 
 }
