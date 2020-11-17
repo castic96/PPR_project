@@ -1,6 +1,6 @@
 #include "processor_smp.h"
 
-void create_topology(std::vector<unsigned>& topology) {
+void Create_Topology(std::vector<unsigned>& topology) {
     topology.clear();
 
     topology.push_back(INPUT_LAYER_NEURONS_COUNT);
@@ -9,7 +9,7 @@ void create_topology(std::vector<unsigned>& topology) {
     topology.push_back(OUTPUT_LAYER_NEURONS_COUNT);
 }
 
-void create_neural_networks(std::vector<kiv_ppr_network::TNetwork>& neural_networks, std::vector<unsigned>& topology) {
+void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_networks, std::vector<unsigned>& topology) {
     neural_networks.clear();
 
     for (int i = 0; i < NEURAL_NETWORKS_COUNT; i++) {
@@ -18,7 +18,7 @@ void create_neural_networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
-std::vector<double> get_target_values_vector(double expected_value) {
+std::vector<double> Get_Target_Values_Vector(double expected_value) {
     std::vector<double> target_values;
     size_t expected_index;
 
@@ -36,7 +36,7 @@ std::vector<double> get_target_values_vector(double expected_value) {
     return target_values;
 }
 
-void print_vector(std::string label, std::vector<double>& vector)
+void Print_Vector(std::string label, std::vector<double>& vector)
 {
     std::cout << label << " ";
 
@@ -47,7 +47,7 @@ void print_vector(std::string label, std::vector<double>& vector)
     std::cout << std::endl;
 }
 
-double calculate_total_error(std::vector<double> relative_errors_vector) {
+double Calculate_Total_Error(std::vector<double> relative_errors_vector) {
     size_t vector_size = relative_errors_vector.size();
     double average_error = 0.0;
     double standard_deviation = 0.0;
@@ -70,7 +70,7 @@ double calculate_total_error(std::vector<double> relative_errors_vector) {
     return average_error + standard_deviation;
 }
 
-void kiv_ppr_smp::run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
+void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     // Otevreni databaze
     kiv_ppr_db_connector::TData_Reader reader = kiv_ppr_db_connector::New_Reader(db_name);
@@ -81,14 +81,16 @@ void kiv_ppr_smp::run(unsigned predicted_minutes, char*& db_name, char*& weights
 
     // Vytvoreni topologie
     std::vector<unsigned> topology;
-    create_topology(topology);
+    Create_Topology(topology);
 
     // Vytvoreni n neuronovych siti s danou topologii
     std::vector<kiv_ppr_network::TNetwork> neural_networks;
-    create_neural_networks(neural_networks, topology);
+    Create_Neural_Networks(neural_networks, topology);
 
     // Nacteni jednoho vstupu
     std::vector<kiv_ppr_db_connector::TElement> input_data = Load_Data(reader);
+    kiv_ppr_db_connector::Close_Database(reader);
+
     kiv_ppr_input_parser::TInput current_input;
     current_input = kiv_ppr_input_parser::Read_Next(input_data, START_ID, predicted_minutes);
 
@@ -112,7 +114,7 @@ void kiv_ppr_smp::run(unsigned predicted_minutes, char*& db_name, char*& weights
         input_values = current_input.values;
 
         // Nacteni cilovych hodnot
-        target_values = get_target_values_vector(current_input.expected_value);
+        target_values = Get_Target_Values_Vector(current_input.expected_value);
 
         tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
 
@@ -129,7 +131,7 @@ void kiv_ppr_smp::run(unsigned predicted_minutes, char*& db_name, char*& weights
     }
 
     for (unsigned i = 0; i < neural_networks.size(); i++) {
-        total_errors.push_back(calculate_total_error(neural_networks[i].relative_errors_vector));
+        total_errors.push_back(Calculate_Total_Error(neural_networks[i].relative_errors_vector));
     }
 
     unsigned min_total_error_index = 0;
@@ -153,8 +155,6 @@ void kiv_ppr_smp::run(unsigned predicted_minutes, char*& db_name, char*& weights
         << total_errors[min_total_error_index]
         << ", NETWORK INDEX: " << min_total_error_index
         << std::endl;
-
-    kiv_ppr_db_connector::Close_Database(reader);
 
 
     /*

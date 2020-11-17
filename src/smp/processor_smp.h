@@ -14,6 +14,6 @@
 
 namespace kiv_ppr_smp {
 
-	void run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name);
+	void Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name);
 
 }

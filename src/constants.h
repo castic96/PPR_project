@@ -6,4 +6,6 @@
 #define     HIDDEN2_LAYER_NEURONS_COUNT     26
 #define     OUTPUT_LAYER_NEURONS_COUNT      32
 #define     NEURAL_NETWORKS_COUNT           20
+#define     COUNT_OF_INPUT_VALUES           8
+#define     MEASURE_INTERVAL_MINUTES		5
 

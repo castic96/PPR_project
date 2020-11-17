@@ -12,7 +12,7 @@ kiv_ppr_input_parser::TInput New_Input(std::vector<double> values, double expect
     return new_input;
 }
 
-size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_vector, unsigned first_index, int limit) {
+size_t kiv_ppr_input_parser::Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_vector, unsigned first_index, int limit) {
 
     for (unsigned i = first_index; i < first_index + limit - 1; i++) {
         if (input_vector[i].segment_id != input_vector[i + 1].segment_id) {
@@ -23,8 +23,8 @@ size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_v
     return 0;
 }
 
-int Compute_Prediction_Places(unsigned prediction_minutes) {
-    return (prediction_minutes / kiv_ppr_input_parser::MEASURE_INTERVAL_MINUTES);
+int kiv_ppr_input_parser::Compute_Prediction_Places(unsigned prediction_minutes) {
+    return (prediction_minutes / MEASURE_INTERVAL_MINUTES);
 }
 
 kiv_ppr_input_parser::TInput kiv_ppr_input_parser::Read_Next(std::vector<kiv_ppr_db_connector::TElement> input_vector, int last_used_first_index, unsigned prediction_minutes) {
@@ -33,8 +33,8 @@ kiv_ppr_input_parser::TInput kiv_ppr_input_parser::Read_Next(std::vector<kiv_ppr
     bool run_again = false;
     unsigned first_index = last_used_first_index + 1;
     
-    int prediction_places = Compute_Prediction_Places(prediction_minutes);
-    int limit = kiv_ppr_input_parser::COUNT_OF_INPUT_VALUES + prediction_places;
+    int prediction_places = kiv_ppr_input_parser::Compute_Prediction_Places(prediction_minutes);
+    int limit = COUNT_OF_INPUT_VALUES + prediction_places;
 
     do {
 
@@ -45,13 +45,13 @@ kiv_ppr_input_parser::TInput kiv_ppr_input_parser::Read_Next(std::vector<kiv_ppr
         }
 
         if (input_vector[first_index].segment_id != input_vector[first_index + limit - 1].segment_id) {
-            first_index = Compute_Changed_Index(input_vector, first_index, limit);
+            first_index = kiv_ppr_input_parser::Compute_Changed_Index(input_vector, first_index, limit);
             run_again = true;
         }
 
     } while (run_again);
 
-    for (unsigned i = first_index; i < first_index + kiv_ppr_input_parser::COUNT_OF_INPUT_VALUES; i++) {
+    for (unsigned i = first_index; i < first_index + COUNT_OF_INPUT_VALUES; i++) {
         values.push_back(input_vector[i].ist);
     }
 

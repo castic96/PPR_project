@@ -1,13 +1,10 @@
-#define CL_HPP_ENABLE_EXCEPTIONS
-#define CL_HPP_TARGET_OPENCL_VERSION 200
-
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <iostream>
 #include    <string>
 #include    "dao/database_connector.h"
 #include    "smp/processor_smp.h"
-#include    <CL/cl2.hpp>
+#include    "gpu/processor_gpu.h"
 
 void prepare_args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, char*& weights_file_name) {
 
@@ -34,19 +31,6 @@ void prepare_args(int argc, char** argv, unsigned& predicted_minutes, char*& db_
 
 }
 
-int show_open_cl_info()
-{
-    //get all platforms (drivers)
-    std::vector<cl::Platform> all_platforms;
-    cl::Platform::get(&all_platforms);
-    if (all_platforms.size() == 0) {
-        std::cout << " No platforms found. Check OpenCL installation!\n";
-        exit(1);
-    }
-    cl::Platform default_platform = all_platforms[0];
-    std::cout << "Using platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-}
-
 int main(int argc, char** argv)
 {
 
@@ -57,6 +41,7 @@ int main(int argc, char** argv)
 
     prepare_args(argc, argv, predicted_minutes, db_name, weights_file_name);
 
-    kiv_ppr_smp::run(predicted_minutes, db_name, weights_file_name);
+    //kiv_ppr_smp::Run(predicted_minutes, db_name, weights_file_name);
+    kiv_ppr_gpu::Run(predicted_minutes, db_name, weights_file_name);
 
 }
