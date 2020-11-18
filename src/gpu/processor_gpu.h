@@ -6,7 +6,10 @@
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <iostream>
+#include	<fstream>
+#include	<sstream>
 #include    <string>
+#include	<streambuf>
 #include    <CL/cl2.hpp>
 #include    "../constants.h"
 #include    "../dao/database_connector.h"

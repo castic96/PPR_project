@@ -8,4 +8,5 @@
 #define     NEURAL_NETWORKS_COUNT           20
 #define     COUNT_OF_INPUT_VALUES           8
 #define     MEASURE_INTERVAL_MINUTES		5
+#define		CL_FILE_DEST					"..\\src\\gpu\\network_gpu.cl"
 

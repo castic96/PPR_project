@@ -120,29 +120,51 @@ void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
 }
 */
 
-void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
-
-    // Otevreni databaze
+std::vector<kiv_ppr_db_connector::TElement> Load_From_Db(char*& db_name) {
     kiv_ppr_db_connector::TData_Reader reader = kiv_ppr_db_connector::New_Reader(db_name);
 
     if (!kiv_ppr_db_connector::Open_Database(reader)) {
         exit(EXIT_FAILURE);
     }
 
-    std::vector<kiv_ppr_db_connector::TElement> input_data = Load_Data(reader);
+    std::vector<kiv_ppr_db_connector::TElement> input_data = kiv_ppr_db_connector::Load_Data(reader);
 
     kiv_ppr_db_connector::Close_Database(reader);
 
+    return input_data;
+}
+
+std::string Load_Code(std::string file) {
+    std::ifstream fileStream(file);
+    std::stringstream buffer;
+    buffer << fileStream.rdbuf();
+
+    return buffer.str();
+}
+
+void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
+
+    // Nacteni dat z db
+    std::vector<kiv_ppr_db_connector::TElement> input_data = Load_From_Db(db_name);
+
+    // Vytvoreni vektoru vstupu a ocekavanych hodnot
     std::vector<float> input_values;
     std::vector<float> expected_values;
     Load_Valid_Inputs(input_data, input_values, expected_values, predicted_minutes);
 
+    // Nacteni dat z vektoru do bufferu
     float *input_values_buff = (float*)calloc(input_values.size(), sizeof(float));
     float *expected_values_buff = (float*)calloc(expected_values.size(), sizeof(float));
-
     Convert_Values_To_Buff(input_values, expected_values, input_values_buff, expected_values_buff);
 
-    // Zde bych mel mit korektne naplnene buffery
+    // Vytvoreni bufferu pro vysledky
+    float* relative_errors_buff = (float*)calloc(expected_values.size(), sizeof(float));
+
+
+    // Nacteni souboru
+    std::string code;
+
+    code = Load_Code(CL_FILE_DEST);
 
 
 
@@ -152,7 +174,8 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
 
 
 
-    // Uvolneni pameti bufferu
+
+    // Uvolneni pameti po bufferech
     free(input_values_buff);
     free(expected_values_buff);
 
