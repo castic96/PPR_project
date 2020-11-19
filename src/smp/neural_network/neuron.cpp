@@ -1,5 +1,5 @@
-#include <random>
 #include <cmath>
+#include "../../util/utils.h"
 #include "neuron.h"
 
 kiv_ppr_neuron::TNeuron kiv_ppr_neuron::New_Neuron(unsigned number_of_outputs, unsigned neuron_index) {
@@ -7,7 +7,7 @@ kiv_ppr_neuron::TNeuron kiv_ppr_neuron::New_Neuron(unsigned number_of_outputs, u
 
 	for (unsigned i = 0; i < number_of_outputs; i++) {
 		new_neuron.output_weights.push_back(kiv_ppr_synapse::New_Synapse());
-		new_neuron.output_weights.back().weight = Get_Random_Weight();
+		new_neuron.output_weights.back().weight = kiv_ppr_utils::Get_Random_Weight();
 	}
 
 	new_neuron.neuron_index = neuron_index;
@@ -19,14 +19,6 @@ kiv_ppr_neuron::TLayer kiv_ppr_neuron::New_Layer() {
 	kiv_ppr_neuron::TLayer new_layer;
 
 	return new_layer;
-}
-
-double kiv_ppr_neuron::Get_Random_Weight() {
-	std::random_device random_device;
-	std::mt19937 generator(random_device());
-	std::uniform_real_distribution<> distribution(0, 1); //uniformni rozdeleni <0,1>
-
-	return distribution(generator);
 }
 
 void kiv_ppr_neuron::Feed_Forward_Hidden(kiv_ppr_neuron::TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer) {

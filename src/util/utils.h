@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../../constants.h"
+#include <vector>
+#include "../constants.h"
 
-namespace kiv_ppr_mapping {
+namespace kiv_ppr_utils {
 
     //mmol/L below which a medical attention is needed
     static constexpr double Low_Threshold = 3.0;
@@ -27,4 +28,7 @@ namespace kiv_ppr_mapping {
 	
     double Band_Index_To_Level(const size_t index);
 	size_t Band_Level_To_Index(double expected_value);
+    double Risk_Function(const double bg);
+    std::vector<double> Get_Target_Values_Vector(double expected_value);
+    double Get_Random_Weight();
 }

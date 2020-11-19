@@ -4,7 +4,7 @@
 #define     HIDDEN1_LAYER_NEURONS_COUNT     16
 #define     HIDDEN2_LAYER_NEURONS_COUNT     26
 #define     OUTPUT_LAYER_NEURONS_COUNT      32
-#define     HELPER_DATA_BUFF_SIZE           2
+#define     HELPER_DATA_BUFF_SIZE           10
 #define		ETA								0.05f
 #define		ALPHA							0.1f
 
@@ -118,17 +118,25 @@ float transfer_function_hidden_der(float value) {
 	return 1.0 - (tanh(value) * tanh(value));
 }
 
-inline void atomic_add_float(volatile __global float* source, const float operand) 
-{
+inline void atomic_add_float(volatile __global float* source, const float operand) {
 	union { unsigned int intVal; float floatVal; } newVal;
 	union { unsigned int intVal; float floatVal; } prevVal;
 	
-    do 
-	{
+    do {
 		prevVal.floatVal = *source;
 		newVal.floatVal = prevVal.floatVal + operand;
-	} 
-	while (atomic_cmpxchg( (volatile __global unsigned int*)source, prevVal.intVal, newVal.intVal ) != prevVal.intVal);
+	} while (atomic_cmpxchg((volatile __global unsigned int*)source, prevVal.intVal, newVal.intVal ) != prevVal.intVal);
+}
+
+ inline void atomic_max_float(volatile __global float *source, const float operand) {
+    
+    union { unsigned int intVal; float floatVal; } newVal;
+    union { unsigned int intVal; float floatVal; } prevVal;
+    
+    do {
+        prevVal.floatVal = *source;
+        newVal.floatVal = max(prevVal.floatVal, operand);
+    } while (atomic_cmpxchg((volatile __global unsigned int *)source, prevVal.intVal, newVal.intVal) != prevVal.intVal);
 }
 
 float get_output_error_gradient(float target_value, float output_value) {
@@ -156,10 +164,9 @@ float get_hidden1_error_gradient(int id, __global float* neural_net_data, __glob
 }
 
 
-
 // ------ Kernely ---------------------------------------------------------------------------
 // --- Prirazeni pocatecnich hodnot do vsech vrstev ---
-__kernel void set_data_to_layers(const int train_set_id, __global float* neural_net_data, __global float* input_data, __global float* helper_data) {
+__kernel void set_data_to_layers(__global int* train_set_id, __global float* neural_net_data, __global float* input_data, __global float* helper_data) {
     int id = get_global_id(0);
     
     if (id >= OUTPUT_LAYER_NEURONS_COUNT)
@@ -178,7 +185,7 @@ __kernel void set_data_to_layers(const int train_set_id, __global float* neural_
 	}
 
     if (id < INPUT_LAYER_NEURONS_COUNT) {
-        neural_net_data[input_neuron_i(id)] = input_data[input_value(train_set_id, id)];
+        neural_net_data[input_neuron_i(id)] = input_data[input_value(train_set_id[0], id)];
 	}
 
     if (id < HELPER_DATA_BUFF_SIZE) {
@@ -254,7 +261,7 @@ __kernel void feed_forward_hidden2_output(__global float* neural_net_data, __glo
 }
 
 // --- Zjisteni indexu neuronu vystupni vrstvy s nejvyssi hodnotou a ulozeni do bufferu ---
-__kernel void set_index_of_result(int train_set_id, __global float* neural_net_data, __global int* result_indexes, __global float* helper_data) {
+__kernel void set_index_of_result(__global int* train_set_id, __global float* neural_net_data, __global int* result_indexes, __global float* helper_data) {
     int id = get_global_id(0);
     
     if (id >= OUTPUT_LAYER_NEURONS_COUNT)
@@ -262,18 +269,18 @@ __kernel void set_index_of_result(int train_set_id, __global float* neural_net_d
         return;
     }
     
-    atomic_max(&helper_data[max_value_output_layer()], neural_net_data[output_neuron_i(id)]);
+    atomic_max_float(&helper_data[max_value_output_layer()], neural_net_data[output_neuron_i(id)]);
 
     barrier(CLK_GLOBAL_MEM_FENCE);
 
     if (isequal(helper_data[max_value_output_layer()], neural_net_data[output_neuron_i(id)])) {
-        atomic_xchg(&result_indexes[result_value(train_set_id)], id);
+        atomic_xchg(&result_indexes[result_value(train_set_id[0])], id);
 	}
 
 }
 
 // --- Back propagation - pro vystupni vrstvu ---
-__kernel void back_prop_output(int train_set_id, __global float* neural_net_data, __global float* target_data, __global float* delta_gradient_data) {
+__kernel void back_prop_output(__global int* train_set_id, __global float* neural_net_data, __global float* target_data, __global float* delta_gradient_data) {
     int id = get_global_id(0);
     
     if (id >= OUTPUT_LAYER_NEURONS_COUNT)
@@ -283,7 +290,7 @@ __kernel void back_prop_output(int train_set_id, __global float* neural_net_data
 
     delta_gradient_data[error_gradient_output(id)] = 
                         get_output_error_gradient(
-                            target_data[target_value(train_set_id, id)], 
+                            target_data[target_value(train_set_id[0], id)], 
                             neural_net_data[output_neuron_i(id)]
                         );
 
@@ -341,6 +348,7 @@ __kernel void back_prop_input(__global float* neural_net_data, __global float* d
 	}
 }
 
+// --- Update vah synapsi ---
 __kernel void update_weights(__global float* neural_net_data, __global float* delta_gradient_data) {
     int id = get_global_id(0);
     

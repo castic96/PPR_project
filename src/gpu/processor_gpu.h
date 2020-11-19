@@ -1,18 +1,14 @@
 #pragma once
 
-#define CL_HPP_ENABLE_EXCEPTIONS
-#define CL_HPP_TARGET_OPENCL_VERSION 220
+#define CL_HPP_TARGET_OPENCL_VERSION 200
 
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <iostream>
-#include	<fstream>
-#include	<sstream>
 #include    <string>
-#include	<streambuf>
 #include    <CL/cl2.hpp>
-#include    "../constants.h"
 #include    "../dao/database_connector.h"
+#include	"network_gpu.h"
 
 namespace kiv_ppr_gpu {
 	void Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name);

@@ -1,24 +1,5 @@
 #include "processor_gpu.h"
 
-//#include "../smp/util/input_parser.h" //pak zmenit minimalne tu cestu aby to nebylo ze smp
-
-int Show_Open_Cl_Info()
-{
-    //get all platforms (drivers)
-    std::vector<cl::Platform> all_platforms;
-    cl::Platform::get(&all_platforms);
-    if (all_platforms.size() == 0) {
-        std::cout << " No platforms found. Check OpenCL installation!\n";
-        exit(1);
-    }
-    cl::Platform default_platform = all_platforms[0];
-    std::cout << "Using platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-}
-
-void Convert_Values_To_Buff(std::vector<float>& input_values, std::vector<float>& expected_values, float*& input_values_buff, float*& expected_values_buff) {
-    std::copy(input_values.begin(), input_values.end(), input_values_buff);
-    std::copy(expected_values.begin(), expected_values.end(), expected_values_buff);
-}
 
 int Compute_Prediction_Places(unsigned prediction_minutes) {
     return (prediction_minutes / MEASURE_INTERVAL_MINUTES);
@@ -36,7 +17,8 @@ size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_v
 }
 
 void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
-    std::vector<float>& input_values, std::vector<float>& expected_values, unsigned predicted_minutes) {
+    std::vector<cl_float>& input_values, std::vector<cl_float>& target_values, std::vector<cl_float>& expected_values, unsigned predicted_minutes) {
+    std::vector<double> current_target_values;
     unsigned index = 0;
     bool run_again = false;
 
@@ -60,10 +42,16 @@ void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
         } while (run_again);
 
         for (unsigned i = index; i < index + COUNT_OF_INPUT_VALUES; i++) {
-            input_values.push_back((float)input_data[i].ist);
+            input_values.push_back((cl_float)kiv_ppr_utils::Risk_Function(input_data[i].ist));
         }
 
-        expected_values.push_back((float)input_data[index + limit - 1].ist);
+        expected_values.push_back((cl_float)input_data[index + limit - 1].ist);
+
+        current_target_values = kiv_ppr_utils::Get_Target_Values_Vector(input_data[index + limit - 1].ist);
+
+        for (unsigned i = 0; i < current_target_values.size(); i++) {
+            target_values.push_back((cl_float)current_target_values[i]);
+        }
 
         index++;
     }
@@ -134,49 +122,27 @@ std::vector<kiv_ppr_db_connector::TElement> Load_From_Db(char*& db_name) {
     return input_data;
 }
 
-std::string Load_Code(std::string file) {
-    std::ifstream fileStream(file);
-    std::stringstream buffer;
-    buffer << fileStream.rdbuf();
-
-    return buffer.str();
-}
-
 void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
+    unsigned num_of_training_sets;
 
     // Nacteni dat z db
     std::vector<kiv_ppr_db_connector::TElement> input_data = Load_From_Db(db_name);
 
+    num_of_training_sets = input_data.size();
+
     // Vytvoreni vektoru vstupu a ocekavanych hodnot
-    std::vector<float> input_values;
-    std::vector<float> expected_values;
-    Load_Valid_Inputs(input_data, input_values, expected_values, predicted_minutes);
+    std::vector<cl_float> input_values;
+    std::vector<cl_float> target_values;
+    std::vector<cl_float> expected_values;
 
-    // Nacteni dat z vektoru do bufferu
-    float *input_values_buff = (float*)calloc(input_values.size(), sizeof(float));
-    float *expected_values_buff = (float*)calloc(expected_values.size(), sizeof(float));
-    Convert_Values_To_Buff(input_values, expected_values, input_values_buff, expected_values_buff);
+    Load_Valid_Inputs(input_data, input_values, target_values, expected_values, predicted_minutes);
 
-    // Vytvoreni bufferu pro vysledky
-    float* relative_errors_buff = (float*)calloc(expected_values.size(), sizeof(float));
+    kiv_ppr_network_gpu::TNetworkGPU network = kiv_ppr_network_gpu::New_Network(input_values, target_values, num_of_training_sets);
 
+    if (!network.is_valid) {
+        return;
+    }
 
-    // Nacteni souboru
-    std::string code;
-
-    code = Load_Code(CL_FILE_DEST);
-
-
-
-
-
-
-
-
-
-
-    // Uvolneni pameti po bufferech
-    free(input_values_buff);
-    free(expected_values_buff);
+    kiv_ppr_network_gpu::Train(network);
 
 }

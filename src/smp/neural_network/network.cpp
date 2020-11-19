@@ -1,7 +1,7 @@
 #include<vector>
 #include<cassert>
 #include "network.h"
-#include "../util/mapping.h"
+#include "../../util/utils.h"
 
 
 kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigned>& topology) {
@@ -36,7 +36,7 @@ void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, cons
 
 	// Prirazeni vstupnich hodnot do vstupni vrstvy (vstupnich neuronu)
 	for (unsigned i = 0; i < input_values.size(); i++) {
-		network.layers[0].neurons[i].output_value = Risk_Function(input_values[i]);
+		network.layers[0].neurons[i].output_value = kiv_ppr_utils::Risk_Function(input_values[i]);
 	}
 
 	// Spusteni forward propagation pro skryte vrstvy
@@ -125,13 +125,6 @@ void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::v
 	}
 }
 
-double kiv_ppr_network::Risk_Function(const double bg) {
-	// DOI:  10.1080/10273660008833060
-	const double original_risk = 1.794 * (pow(log(bg), 1.026) - 1.861);    //mmol/L
-
-	return original_risk / 3.5;
-}
-
 void kiv_ppr_network::Get_Results(kiv_ppr_network::TNetwork& network, std::vector<double>& result_values) {
 	result_values.clear();
 
@@ -150,7 +143,7 @@ double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_valu
 		}
 	}
 
-	double result_value = kiv_ppr_mapping::Band_Index_To_Level(result_index);
+	double result_value = kiv_ppr_utils::Band_Index_To_Level(result_index);
 
 	return (std::abs(result_value - expected_value) / expected_value);
 }

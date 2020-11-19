@@ -18,24 +18,6 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
-std::vector<double> Get_Target_Values_Vector(double expected_value) {
-    std::vector<double> target_values;
-    size_t expected_index;
-
-    target_values.clear();
-
-    // Vytvoreni vektoru o velikosti poctu vystupnich neuronu - inicializace na 0
-    for (int i = 0; i < OUTPUT_LAYER_NEURONS_COUNT; i++) {
-        target_values.push_back(0);
-    }
-
-    expected_index = kiv_ppr_mapping::Band_Level_To_Index(expected_value);
-
-    target_values[expected_index] = 1;
-
-    return target_values;
-}
-
 void Print_Vector(std::string label, std::vector<double>& vector)
 {
     std::cout << label << " ";
@@ -114,7 +96,7 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
         input_values = current_input.values;
 
         // Nacteni cilovych hodnot
-        target_values = Get_Target_Values_Vector(current_input.expected_value);
+        target_values = kiv_ppr_utils::Get_Target_Values_Vector(current_input.expected_value);
 
         tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
 

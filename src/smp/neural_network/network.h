@@ -19,7 +19,6 @@ namespace kiv_ppr_network {
 	void Feed_Forward_Prop(TNetwork& network, const std::vector<double>& input_values);
 	void Back_Prop(TNetwork& network, const std::vector<double>& target_values, double expected_value);
 	void Get_Results(TNetwork& network, std::vector<double>& result_values);
-	double Risk_Function(const double bg);
 	double Calculate_Relative_Error(std::vector<double> result_values, double expected_value);
 
 }

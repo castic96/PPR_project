@@ -1,8 +1,8 @@
 #pragma once
 
 #include	<vector>
-#include	"../../constants.h"
-#include	"../../dao/database_connector.h"
+#include	"../constants.h"
+#include	"../dao/database_connector.h"
 
 namespace kiv_ppr_input_parser {
 

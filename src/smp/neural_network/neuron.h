@@ -9,9 +9,9 @@
 namespace kiv_ppr_neuron {
 
 	struct TNeuron {
-		double output_value;
+		double output_value = 0.0;
 		std::vector<kiv_ppr_synapse::TSynapse> output_weights;
-		unsigned neuron_index;
+		unsigned neuron_index = 0;
 		double gradient = 0.0;
 	};
 
@@ -20,7 +20,6 @@ namespace kiv_ppr_neuron {
 	};
 
 	TNeuron New_Neuron(unsigned number_of_outputs, unsigned neuron_index);
-	double Get_Random_Weight();
 	void Feed_Forward_Hidden(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
 	void Feed_Forward_Output(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
 	double Transfer_Function_Hidden(double value);
