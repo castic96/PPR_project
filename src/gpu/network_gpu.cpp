@@ -210,6 +210,7 @@ void Write_Init_Data_To_Buffers(kiv_ppr_network_gpu::TNetworkGPU& network, unsig
 }
 
 void Create_Kernels(kiv_ppr_network_gpu::TNetworkGPU& network, cl::Program program) {
+	network.inc_train_set_id = new cl::Kernel(program, "inc_train_set_id");
 	network.set_data_to_layers = new cl::Kernel(program, "set_data_to_layers");
 	network.feed_forward_input_hidden1 = new cl::Kernel(program, "feed_forward_input_hidden1");
 	network.feed_forward_hidden1_hidden2 = new cl::Kernel(program, "feed_forward_hidden1_hidden2");
@@ -223,6 +224,9 @@ void Create_Kernels(kiv_ppr_network_gpu::TNetworkGPU& network, cl::Program progr
 }
 
 void Set_Args_To_Kernels(kiv_ppr_network_gpu::TNetworkGPU& network) {
+
+	// Kernel: inc_train_set_id
+	network.inc_train_set_id->setArg(0, *(network.cl_buff_training_set_id));
 
 	// Kernel: set_data_to_layers
 	network.set_data_to_layers->setArg(0, *(network.cl_buff_training_set_id));
@@ -269,18 +273,93 @@ void Set_Args_To_Kernels(kiv_ppr_network_gpu::TNetworkGPU& network) {
 	network.update_weights->setArg(1, *(network.cl_buff_delta_gradient_data));
 }
 
-void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU network) {
+void kiv_ppr_network_gpu::Get_Relative_Errors_Vector(kiv_ppr_network_gpu::TNetworkGPU& network, std::vector<double>& expected_values, std::vector<double>& relative_errors_vector) {
+	double result_value = 0.0;
 
 	for (unsigned i = 0; i < network.num_of_training_sets; i++) {
-		network.training_set_id_buff[0] = i;
+		result_value = kiv_ppr_utils::Band_Index_To_Level(network.result_indexes_buff[i]);
 
-		network.queue->enqueueWriteBuffer(*(network.cl_buff_training_set_id), CL_TRUE, 0, sizeof(cl_int), network.training_set_id_buff);
-
-		network.queue->enqueueNDRangeKernel(*(network.set_data_to_layers), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
-		network.queue->finish();
-		network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
-
+		relative_errors_vector.push_back((std::abs(result_value - expected_values[i]) / expected_values[i]));
 	}
+
+}
+
+void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
+
+	for (unsigned i = 0; i < network.num_of_training_sets; i++) {
+		//network.training_set_id_buff[0] = i;
+
+		//network.queue->enqueueWriteBuffer(*(network.cl_buff_training_set_id), CL_TRUE, 0, sizeof(cl_int), network.training_set_id_buff);
+
+		// Kernel: inc_train_set_id
+		network.queue->enqueueNDRangeKernel(*(network.inc_train_set_id), cl::NullRange, cl::NDRange(1), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: set_data_to_layers
+		network.queue->enqueueNDRangeKernel(*(network.set_data_to_layers), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: feed_forward_input_hidden1
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_input_hidden1), cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: feed_forward_hidden1_hidden2
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden1_hidden2), cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: feed_forward_hidden2_output
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden2_output), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: set_index_of_result
+		network.queue->enqueueNDRangeKernel(*(network.set_index_of_result), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: back_prop_output
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_output), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: back_prop_hidden2
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden2), cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT + 1), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: back_prop_hidden1
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden1), cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT + 1), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: back_prop_input
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_input), cl::NullRange, cl::NDRange(INPUT_LAYER_NEURONS_COUNT + 1), cl::NullRange);
+		//network.queue->finish();
+
+		// Kernel: update_weights
+		network.queue->enqueueNDRangeKernel(*(network.update_weights), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		network.queue->finish();
+
+		//network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
+		//network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
+
+		/*
+		for (unsigned i = 0; i < CL_BUFF_NEURAL_NET_DATA_SIZE; i++)
+			std::cout << network.neural_net_buff[i] << std::endl;
+		
+		std::cout << "\n\nVysledek: " << network.result_indexes_buff[0] << std::endl;
+		*/
+		
+		/*
+		for (unsigned i = 0; i < (network.num_of_training_sets + 1); i++)
+			std::cout << network.result_indexes_buff[i] << std::endl;
+			*/
+
+
+		//network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
+
+		/*
+		for (unsigned i = 0; i < CL_BUFF_NEURAL_NET_DATA_SIZE; i++)
+			std::cout << network.neural_net_buff[i] << std::endl;
+		*/
+	}
+
+	network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
 
 }
 
@@ -319,7 +398,7 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<cl
 	Allocate_Buffers(new_network, context, input_values_size, target_values_size);
 
 	Convert_Vectors_To_Buff(input_values, target_values, new_network.input_values_buff, new_network.target_values_buff);
-
+	// TODO: az sem klidne muze byt spolecne pro vice siti (z kazde site pak ulozit relativni chyby, plus vahy)
 	Init_Network_Data(new_network);
 	Init_Training_Set_Id(new_network);
 	Init_Weights(new_network);

@@ -95,3 +95,26 @@ double kiv_ppr_utils::Get_Random_Weight() {
 
     return distribution(generator);
 }
+
+double kiv_ppr_utils::Calculate_Total_Error(std::vector<double> relative_errors_vector) {
+    size_t vector_size = relative_errors_vector.size();
+    double average_error = 0.0;
+    double standard_deviation = 0.0;
+    double sum = 0.0;
+
+    for (unsigned i = 0; i < vector_size; i++) {
+        sum += relative_errors_vector[i];
+    }
+
+    average_error = sum / (double)vector_size;
+
+    sum = 0.0;
+
+    for (unsigned i = 0; i < vector_size; i++) {
+        sum += pow(relative_errors_vector[i] - average_error, 2);
+    }
+
+    standard_deviation = sqrt(sum / (double)vector_size);
+
+    return average_error + standard_deviation;
+}

@@ -165,6 +165,18 @@ float get_hidden1_error_gradient(int id, __global float* neural_net_data, __glob
 
 
 // ------ Kernely ---------------------------------------------------------------------------
+// --- Zvyseni pocitadla trenovaci mnoziny ---
+__kernel void inc_train_set_id(__global int* train_set_id) {
+    int id = get_global_id(0);
+
+    if (id > 1)
+    {
+        return;
+    }
+
+    train_set_id[0]++;
+}
+
 // --- Prirazeni pocatecnich hodnot do vsech vrstev ---
 __kernel void set_data_to_layers(__global int* train_set_id, __global float* neural_net_data, __global float* input_data, __global float* helper_data) {
     int id = get_global_id(0);

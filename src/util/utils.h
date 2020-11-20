@@ -31,4 +31,5 @@ namespace kiv_ppr_utils {
     double Risk_Function(const double bg);
     std::vector<double> Get_Target_Values_Vector(double expected_value);
     double Get_Random_Weight();
+    double Calculate_Total_Error(std::vector<double> relative_errors_vector);
 }

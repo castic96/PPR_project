@@ -29,29 +29,6 @@ void Print_Vector(std::string label, std::vector<double>& vector)
     std::cout << std::endl;
 }
 
-double Calculate_Total_Error(std::vector<double> relative_errors_vector) {
-    size_t vector_size = relative_errors_vector.size();
-    double average_error = 0.0;
-    double standard_deviation = 0.0;
-    double sum = 0.0;
-
-    for (unsigned i = 0; i < vector_size; i++) {
-        sum += relative_errors_vector[i];
-    }
-
-    average_error = sum / (double)vector_size;
-
-    sum = 0.0;
-
-    for (unsigned i = 0; i < vector_size; i++) {
-        sum += pow(relative_errors_vector[i] - average_error, 2);
-    }
-
-    standard_deviation = sqrt(sum / (double)vector_size);
-
-    return average_error + standard_deviation;
-}
-
 void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     // Otevreni databaze
@@ -113,7 +90,7 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
     }
 
     for (unsigned i = 0; i < neural_networks.size(); i++) {
-        total_errors.push_back(Calculate_Total_Error(neural_networks[i].relative_errors_vector));
+        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(neural_networks[i].relative_errors_vector));
     }
 
     unsigned min_total_error_index = 0;

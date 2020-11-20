@@ -17,7 +17,7 @@ size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_v
 }
 
 void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
-    std::vector<cl_float>& input_values, std::vector<cl_float>& target_values, std::vector<cl_float>& expected_values, unsigned predicted_minutes) {
+    std::vector<cl_float>& input_values, std::vector<cl_float>& target_values, std::vector<double>& expected_values, unsigned predicted_minutes) {
     std::vector<double> current_target_values;
     unsigned index = 0;
     bool run_again = false;
@@ -45,7 +45,7 @@ void Load_Valid_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
             input_values.push_back((cl_float)kiv_ppr_utils::Risk_Function(input_data[i].ist));
         }
 
-        expected_values.push_back((cl_float)input_data[index + limit - 1].ist);
+        expected_values.push_back(input_data[index + limit - 1].ist);
 
         current_target_values = kiv_ppr_utils::Get_Target_Values_Vector(input_data[index + limit - 1].ist);
 
@@ -128,14 +128,14 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
     // Nacteni dat z db
     std::vector<kiv_ppr_db_connector::TElement> input_data = Load_From_Db(db_name);
 
-    num_of_training_sets = input_data.size();
-
     // Vytvoreni vektoru vstupu a ocekavanych hodnot
     std::vector<cl_float> input_values;
     std::vector<cl_float> target_values;
-    std::vector<cl_float> expected_values;
+    std::vector<double> expected_values;
 
     Load_Valid_Inputs(input_data, input_values, target_values, expected_values, predicted_minutes);
+
+    num_of_training_sets = expected_values.size();
 
     kiv_ppr_network_gpu::TNetworkGPU network = kiv_ppr_network_gpu::New_Network(input_values, target_values, num_of_training_sets);
 
@@ -145,4 +145,12 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
 
     kiv_ppr_network_gpu::Train(network);
 
+    std::vector<double> relative_errors_vector;
+    kiv_ppr_network_gpu::Get_Relative_Errors_Vector(network, expected_values, relative_errors_vector);
+
+    double error = kiv_ppr_utils::Calculate_Total_Error(relative_errors_vector);
+
+    //TODO: nekde tady uvolnit buffery
+
+    std::cout << "Chyba: " << error << std::endl;
 }

@@ -60,6 +60,9 @@ namespace kiv_ppr_network_gpu {
 		// ----------------------------------------------------------------------------------
 
 		// ----- KERNELY --------------------------------------------------------------------
+		// Zvyseni pocitadla trenovaci mnoziny
+		cl::Kernel* inc_train_set_id;
+		
 		// Prirazeni pocatecnich hodnot do vsech vrstev 
 		cl::Kernel* set_data_to_layers;
 
@@ -93,6 +96,7 @@ namespace kiv_ppr_network_gpu {
 	};
 
 	TNetworkGPU New_Network(std::vector<cl_float> input_values, std::vector<cl_float> expected_values, unsigned num_of_training_sets);
-	void Train(TNetworkGPU network);
+	void Train(TNetworkGPU& network);
+	void Get_Relative_Errors_Vector(TNetworkGPU& network, std::vector<double>& expected_values, std::vector<double>& relative_errors_vector);
 
 }
