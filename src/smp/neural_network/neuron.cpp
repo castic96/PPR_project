@@ -2,13 +2,31 @@
 #include "../../util/utils.h"
 #include "neuron.h"
 
-kiv_ppr_neuron::TNeuron kiv_ppr_neuron::New_Neuron(unsigned number_of_outputs, unsigned neuron_index) {
+kiv_ppr_neuron::TNeuron kiv_ppr_neuron::New_Neuron(unsigned number_of_outputs, unsigned neuron_index, unsigned test_index) {
 	kiv_ppr_neuron::TNeuron new_neuron;
 
-	for (unsigned i = 0; i < number_of_outputs; i++) {
-		new_neuron.output_weights.push_back(kiv_ppr_synapse::New_Synapse());
-		new_neuron.output_weights.back().weight = kiv_ppr_utils::Get_Random_Weight();
+	if (test_index == 0) {
+		for (unsigned i = 0; i < number_of_outputs; i++) {
+			new_neuron.output_weights.push_back(kiv_ppr_synapse::New_Synapse());
+			new_neuron.output_weights.back().weight = 0.3;
+		}
 	}
+
+	if (test_index == 1) {
+		for (unsigned i = 0; i < number_of_outputs; i++) {
+			new_neuron.output_weights.push_back(kiv_ppr_synapse::New_Synapse());
+			new_neuron.output_weights.back().weight = 0.4;
+		}
+	}
+
+	if (test_index == 2) {
+		for (unsigned i = 0; i < number_of_outputs; i++) {
+			new_neuron.output_weights.push_back(kiv_ppr_synapse::New_Synapse());
+			new_neuron.output_weights.back().weight = 0.6;
+		}
+	}
+
+
 
 	new_neuron.neuron_index = neuron_index;
 

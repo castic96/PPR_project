@@ -287,6 +287,7 @@ __kernel void set_index_of_result(__global int* train_set_id, __global float* ne
 
     if (isequal(helper_data[max_value_output_layer()], neural_net_data[output_neuron_i(id)])) {
         atomic_xchg(&result_indexes[result_value(train_set_id[0])], id);
+        return;
 	}
 
 }

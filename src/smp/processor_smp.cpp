@@ -66,6 +66,8 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
 
     while (current_input.valid) {
 
+        if (counter == 5000) break;
+
         // Tisk poradi
         counter++;
 
@@ -75,6 +77,13 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
         // Nacteni cilovych hodnot
         target_values = kiv_ppr_utils::Get_Target_Values_Vector(current_input.expected_value);
 
+        // Spusteni feed forward propagation
+        kiv_ppr_network::Feed_Forward_Prop(neural_networks[0], input_values);
+
+        // Spusteni back propagation
+        kiv_ppr_network::Back_Prop(neural_networks[0], target_values, current_input.expected_value, counter);
+
+        /*
         tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
 
             // Spusteni feed forward propagation
@@ -83,7 +92,7 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
             // Spusteni back propagation
             kiv_ppr_network::Back_Prop(neural_networks[i], target_values, current_input.expected_value);
 
-            });
+            }); */
 
         // Nacteni dalsiho vstupu
         current_input = kiv_ppr_input_parser::Read_Next(input_data, current_input.first_index, predicted_minutes);

@@ -181,19 +181,22 @@ void Init_Weights(kiv_ppr_network_gpu::TNetworkGPU& network) {
 
 	for (unsigned i = 0; i <= INPUT_LAYER_NEURONS_COUNT; i++) {
 		for (unsigned j = 0; j < HIDDEN1_LAYER_NEURONS_COUNT; j++) {
-			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_input_hidden1(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			//network.neural_net_buff[kiv_ppr_mapping_gpu::weight_input_hidden1(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_input_hidden1(i, j)] = (cl_float)0.3f;
 		}
 	}
 
 	for (unsigned i = 0; i <= HIDDEN1_LAYER_NEURONS_COUNT; i++) {
 		for (unsigned j = 0; j < HIDDEN2_LAYER_NEURONS_COUNT; j++) {
-			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden1_hidden2(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			//network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden1_hidden2(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden1_hidden2(i, j)] = (cl_float)0.4f;
 		}
 	}
 
 	for (unsigned i = 0; i <= HIDDEN2_LAYER_NEURONS_COUNT; i++) {
 		for (unsigned j = 0; j < OUTPUT_LAYER_NEURONS_COUNT; j++) {
-			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden2_output(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			//network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden2_output(i, j)] = (cl_float)kiv_ppr_utils::Get_Random_Weight();
+			network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden2_output(i, j)] = (cl_float)0.6f;
 		}
 	}
 
@@ -286,7 +289,7 @@ void kiv_ppr_network_gpu::Get_Relative_Errors_Vector(kiv_ppr_network_gpu::TNetwo
 
 void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 
-	for (unsigned i = 0; i < network.num_of_training_sets; i++) {
+	for (unsigned i = 0; i < 5000; i++) {
 		//network.training_set_id_buff[0] = i;
 
 		//network.queue->enqueueWriteBuffer(*(network.cl_buff_training_set_id), CL_TRUE, 0, sizeof(cl_int), network.training_set_id_buff);
@@ -334,16 +337,16 @@ void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 		// Kernel: update_weights
 		network.queue->enqueueNDRangeKernel(*(network.update_weights), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
 		network.queue->finish();
-
-		//network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
-		//network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
+		
+		network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
+		network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
 
 		/*
 		for (unsigned i = 0; i < CL_BUFF_NEURAL_NET_DATA_SIZE; i++)
-			std::cout << network.neural_net_buff[i] << std::endl;
+			std::cout << network.neural_net_buff[i] << std::endl;*/
 		
-		std::cout << "\n\nVysledek: " << network.result_indexes_buff[0] << std::endl;
-		*/
+		std::cout << (i + 1) << ": " << network.result_indexes_buff[i] << std::endl;
+		
 		
 		/*
 		for (unsigned i = 0; i < (network.num_of_training_sets + 1); i++)
@@ -360,7 +363,7 @@ void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 	}
 
 	network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
-
+	network.queue->finish();
 }
 
 kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<cl_float> input_values, std::vector<cl_float> target_values, unsigned num_of_training_sets) {

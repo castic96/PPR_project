@@ -1,5 +1,6 @@
 #include<vector>
 #include<cassert>
+#include <iostream>
 #include "network.h"
 #include "../../util/utils.h"
 
@@ -20,7 +21,7 @@ kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigne
 		}
 
 		for (unsigned j = 0; j <= topology[i]; j++) {
-			new_network.layers.back().neurons.push_back(kiv_ppr_neuron::New_Neuron(number_of_outputs, j));
+			new_network.layers.back().neurons.push_back(kiv_ppr_neuron::New_Neuron(number_of_outputs, j, i));
 		}
 
 		new_network.layers.back().neurons.back().output_value = 1.0;
@@ -66,12 +67,12 @@ void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, cons
 
 }
 
-void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, double expected_value) {
+void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, double expected_value, unsigned counter) {
 
 	// Vypocitani relativni chyby a pridani do vektoru chyb v siti	
 	std::vector<double> result_values;
 	kiv_ppr_network::Get_Results(network, result_values);
-	double relative_error = kiv_ppr_network::Calculate_Relative_Error(result_values, expected_value);
+	double relative_error = kiv_ppr_network::Calculate_Relative_Error(result_values, expected_value, counter);
 	network.relative_errors_vector.push_back(relative_error);
 
 	// Vypoètení kumulativní chyby (RMS výstupních chyb)
@@ -134,7 +135,7 @@ void kiv_ppr_network::Get_Results(kiv_ppr_network::TNetwork& network, std::vecto
 
 }
 
-double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_values, double expected_value) {
+double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_values, double expected_value, unsigned counter) {
 
 	unsigned result_index = 0;
 	for (unsigned i = 0; i < result_values.size(); i++) {
@@ -142,6 +143,8 @@ double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_valu
 			result_index = i;
 		}
 	}
+
+	std::cout << counter << ": " << result_index << std::endl;
 
 	double result_value = kiv_ppr_utils::Band_Index_To_Level(result_index);
 

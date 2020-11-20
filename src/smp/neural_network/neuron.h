@@ -19,7 +19,7 @@ namespace kiv_ppr_neuron {
 		std::vector<kiv_ppr_neuron::TNeuron> neurons;
 	};
 
-	TNeuron New_Neuron(unsigned number_of_outputs, unsigned neuron_index);
+	TNeuron New_Neuron(unsigned number_of_outputs, unsigned neuron_index, unsigned test_index);
 	void Feed_Forward_Hidden(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
 	void Feed_Forward_Output(TNeuron& neuron, kiv_ppr_neuron::TLayer& previous_layer);
 	double Transfer_Function_Hidden(double value);
