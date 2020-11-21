@@ -5,7 +5,7 @@
 #define     HIDDEN2_LAYER_NEURONS_COUNT     26
 #define     OUTPUT_LAYER_NEURONS_COUNT      32
 #define     HELPER_DATA_BUFF_SIZE           10
-#define		ETA								0.05f
+#define		ETA								0.01f
 #define		ALPHA							0.1f
 
 
@@ -259,16 +259,7 @@ __kernel void feed_forward_hidden2_output(__global float* neural_net_data, __glo
                             neural_net_data[weight_hidden2_output(i, id)];
 	}
 
-    neural_net_data[output_neuron_i(id)] = transfer_function_output(neural_net_data[output_neuron_i(id)]);
-
-    // Atomicky soucet - muze pristupovat vice vlaken najednou
-    atomic_add_float(&helper_data[exp_sum_output_layer()], neural_net_data[output_neuron_i(id)]);
-
-    // Bariera zastavi vsechna vlakna do te doby, nez vsechna vlakna 
-    // prictou do souctu exponencialnich hodnot svoji hodnotu
-    barrier(CLK_GLOBAL_MEM_FENCE);
-
-    neural_net_data[output_neuron_i(id)] /= helper_data[exp_sum_output_layer()];
+    neural_net_data[output_neuron_i(id)] = transfer_function_hidden(neural_net_data[output_neuron_i(id)]);
 
 }
 

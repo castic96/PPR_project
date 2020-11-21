@@ -5,8 +5,6 @@
 #define		CL_BUFF_DELTA_GRADIENT_DATA_SIZE	2000
 #define     BIAS								1
 #define     HELPER_DATA_BUFF_SIZE				10
-#define		ETA									0.05f
-#define		ALPHA								0.1f
 
 #include "../constants.h"
 
