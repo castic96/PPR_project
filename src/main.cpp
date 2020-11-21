@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
     prepare_args(argc, argv, predicted_minutes, db_name, weights_file_name);
 
-    //kiv_ppr_smp::Run(predicted_minutes, db_name, weights_file_name);
-    kiv_ppr_gpu::Run(predicted_minutes, db_name, weights_file_name);
+    kiv_ppr_smp::Run(predicted_minutes, db_name, weights_file_name);
+    //kiv_ppr_gpu::Run(predicted_minutes, db_name, weights_file_name);
 
 }
