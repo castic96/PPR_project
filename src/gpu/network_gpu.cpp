@@ -363,6 +363,14 @@ void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 
 }
 
+void kiv_ppr_network_gpu::Init_Data(kiv_ppr_network_gpu::TNetworkGPU& network, unsigned input_values_size, unsigned target_values_size) {
+	Init_Network_Data(network);
+	Init_Training_Set_Id(network);
+	Init_Weights(network);
+
+	Write_Init_Data_To_Buffers(network, input_values_size, target_values_size);
+}
+
 kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<cl_float> input_values, std::vector<cl_float> target_values, unsigned num_of_training_sets) {
     kiv_ppr_network_gpu::TNetworkGPU new_network;
 	std::vector<cl::Device> devices_gpu;
@@ -398,19 +406,14 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<cl
 	Allocate_Buffers(new_network, context, input_values_size, target_values_size);
 
 	Convert_Vectors_To_Buff(input_values, target_values, new_network.input_values_buff, new_network.target_values_buff);
-	// TODO: az sem klidne muze byt spolecne pro vice siti (z kazde site pak ulozit relativni chyby, plus vahy)
-	Init_Network_Data(new_network);
-	Init_Training_Set_Id(new_network);
-	Init_Weights(new_network);
-
-	new_network.queue = new cl::CommandQueue(context, *(new_network.default_device));
-
-	Write_Init_Data_To_Buffers(new_network, input_values_size, target_values_size);
 
 	Create_Kernels(new_network, program);
 	Set_Args_To_Kernels(new_network);
 
+	new_network.queue = new cl::CommandQueue(context, *(new_network.default_device));
+
 	new_network.is_valid = true;
+		
 	return new_network;
 }
 

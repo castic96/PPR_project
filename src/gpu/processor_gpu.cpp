@@ -123,7 +123,9 @@ std::vector<kiv_ppr_db_connector::TElement> Load_From_Db(char*& db_name) {
 }
 
 void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
-    unsigned num_of_training_sets;
+    std::vector<double> relative_errors_vector;
+    std::vector<std::vector<double>> relative_errors_all;
+    std::vector<double> total_errors;
 
     // Nacteni dat z db
     std::vector<kiv_ppr_db_connector::TElement> input_data = Load_From_Db(db_name);
@@ -135,7 +137,9 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
 
     Load_Valid_Inputs(input_data, input_values, target_values, expected_values, predicted_minutes);
 
-    num_of_training_sets = expected_values.size();
+    unsigned input_values_size = input_values.size();
+    unsigned target_values_size = target_values.size();
+    unsigned num_of_training_sets = expected_values.size();
 
     kiv_ppr_network_gpu::TNetworkGPU network = kiv_ppr_network_gpu::New_Network(input_values, target_values, num_of_training_sets);
 
@@ -143,14 +147,51 @@ void kiv_ppr_gpu::Run(unsigned predicted_minutes, char*& db_name, char*& weights
         return;
     }
 
-    kiv_ppr_network_gpu::Train(network);
+    for (unsigned i = 0; i < 20; i++) {
+        relative_errors_vector.clear();
 
-    std::vector<double> relative_errors_vector;
-    kiv_ppr_network_gpu::Get_Relative_Errors_Vector(network, expected_values, relative_errors_vector);
+        kiv_ppr_network_gpu::Init_Data(network, input_values_size, target_values_size);
 
-    double error = kiv_ppr_utils::Calculate_Total_Error(relative_errors_vector);
+        kiv_ppr_network_gpu::Train(network);
+
+        kiv_ppr_network_gpu::Get_Relative_Errors_Vector(network, expected_values, relative_errors_vector);
+
+        relative_errors_all.push_back(relative_errors_vector);
+    }
+
+
+
+    for (unsigned i = 0; i < 20; i++) {
+        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(relative_errors_all[i]));
+        
+    }
+
+    //double error = kiv_ppr_utils::Calculate_Total_Error(relative_errors_vector);
 
     //TODO: nekde tady uvolnit buffery
 
-    std::cout << "Chyba: " << error << std::endl;
+    //TODO: pak smazat
+    unsigned min_total_error_index = 0;
+
+    for (unsigned i = 0; i < total_errors.size(); i++) {
+        if (total_errors[i] < total_errors[min_total_error_index]) {
+            min_total_error_index = i;
+        }
+    }
+
+    // Vypis vsech chyb
+    std::cout << "TOTAL ERRORS: ";
+    for (unsigned i = 0; i < total_errors.size(); i++) {
+        std::cout << total_errors[i] << " ";
+    }
+    std::cout << std::endl;
+
+    // Vypis chyby pro nejlepsi sit
+    std::cout
+        << "BEST TOTAL ERROR: "
+        << total_errors[min_total_error_index]
+        << ", NETWORK INDEX: " << min_total_error_index
+        << std::endl;
+
+    //std::cout << "Chyba: " << error << std::endl;
 }
