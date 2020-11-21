@@ -5,6 +5,9 @@ kiv_ppr_synapse::TSynapse kiv_ppr_synapse::New_Synapse() {
 	
 	new_synapse.weight = 0.0;
 	new_synapse.delta_weight = 0.0;
+	new_synapse.current_counter = 0.0;
+	new_synapse.counter_green_graph = 0.0;
+	new_synapse.counter_blue_graph = 0.0;
 
 	return new_synapse;
 }

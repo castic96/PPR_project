@@ -25,9 +25,11 @@ void kiv_ppr_neuron::Feed_Forward_Hidden(kiv_ppr_neuron::TNeuron& neuron, kiv_pp
 	double sum = 0.0;
 
 	for (unsigned i = 0; i < previous_layer.neurons.size(); i++) {
-		kiv_ppr_neuron::TNeuron prev_neuron = previous_layer.neurons[i];
+		kiv_ppr_neuron::TNeuron& prev_neuron = previous_layer.neurons[i];
 
 		sum += prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
+		prev_neuron.output_weights[neuron.neuron_index].current_counter = prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
+	
 	}
 
 	neuron.output_value = kiv_ppr_neuron::Transfer_Function_Hidden(sum);
@@ -37,9 +39,11 @@ void kiv_ppr_neuron::Feed_Forward_Output(kiv_ppr_neuron::TNeuron& neuron, kiv_pp
 	double sum = 0.0;
 
 	for (unsigned i = 0; i < previous_layer.neurons.size(); i++) {
-		kiv_ppr_neuron::TNeuron prev_neuron = previous_layer.neurons[i];
+		kiv_ppr_neuron::TNeuron& prev_neuron = previous_layer.neurons[i];
 
 		sum += prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
+		prev_neuron.output_weights[neuron.neuron_index].current_counter = prev_neuron.output_value * prev_neuron.output_weights[neuron.neuron_index].weight;
+
 	}
 
 	neuron.output_value = kiv_ppr_neuron::Transfer_Function_Output(sum);

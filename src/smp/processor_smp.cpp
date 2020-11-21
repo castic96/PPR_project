@@ -19,7 +19,8 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
-void kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+kiv_ppr_smp::TResults_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+    kiv_ppr_smp::TResults_CPU result;
 
     // Vytvoreni topologie
     std::vector<unsigned> topology;
@@ -41,10 +42,13 @@ void kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vecto
             // Spusteni feed forward propagation
             kiv_ppr_network::Feed_Forward_Prop(neural_networks[j], input_values, i);
 
-            // Spusteni back propagation
-            kiv_ppr_network::Back_Prop(neural_networks[j], target_values, expected_values[i], i);
+            // Vypocitani relativni chyby a pridani do vektoru chyb v siti
+            kiv_ppr_network::Save_Relative_Error(neural_networks[j], expected_values[i]);
 
-            });
+            // Spusteni back propagation
+            kiv_ppr_network::Back_Prop(neural_networks[j], target_values, i);
+
+        });
 
     }
 
@@ -60,6 +64,10 @@ void kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vecto
         }
     }
 
+    result.network = neural_networks[min_total_error_index];
+    result.relative_errors;
+    result.weights;
+
     // Vypis vsech chyb
     std::cout << "TOTAL ERRORS: ";
     for (unsigned j = 0; j < total_errors.size(); j++) {
@@ -74,4 +82,5 @@ void kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vecto
         << ", NETWORK INDEX: " << min_total_error_index
         << std::endl;
 
+    return result;
 }

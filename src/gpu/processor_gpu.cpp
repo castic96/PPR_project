@@ -1,7 +1,8 @@
 #include "processor_gpu.h"
 
 
-void kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+kiv_ppr_gpu::TResults_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+    kiv_ppr_gpu::TResults_GPU result;
     std::vector<double> relative_errors_vector;
     std::vector<std::vector<double>> relative_errors_all;
     std::vector<double> total_errors;
@@ -13,7 +14,7 @@ void kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vecto
     kiv_ppr_network_gpu::TNetworkGPU network = kiv_ppr_network_gpu::New_Network(input_values, target_values, num_of_training_sets);
 
     if (!network.is_valid) {
-        return;
+        return result;
     }
 
     for (unsigned i = 0; i < 1; i++) {
@@ -48,6 +49,10 @@ void kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vecto
         }
     }
 
+    result.network = network;
+    result.relative_errors;
+    result.weights;
+
     // Vypis vsech chyb
     std::cout << "TOTAL ERRORS: ";
     for (unsigned i = 0; i < total_errors.size(); i++) {
@@ -63,4 +68,6 @@ void kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vecto
         << std::endl;
 
     //std::cout << "Chyba: " << error << std::endl;
+
+    return result;
 }

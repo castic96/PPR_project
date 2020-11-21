@@ -5,6 +5,7 @@
 #include    "dao/database_loader.h"
 #include    "smp/processor_smp.h"
 #include    "gpu/processor_gpu.h"
+#include    "util/svg_generator.h"
 
 void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, char*& weights_file_name) {
 
@@ -47,12 +48,17 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
 
         // --- Spusteni na GPU ---
         if (run_gpu) {
-            kiv_ppr_gpu::Run_Training_GPU(input_values, target_values, expected_values);
+            kiv_ppr_gpu::TResults_GPU result_gpu = kiv_ppr_gpu::Run_Training_GPU(input_values, target_values, expected_values);
         }
 
         // --- Spusteni na CPU ---
         else {
-            kiv_ppr_smp::Run_Training_CPU(input_values, target_values, expected_values);
+            std::string green_graph;
+            std::string blue_graph;
+
+            kiv_ppr_smp::TResults_CPU result_cpu = kiv_ppr_smp::Run_Training_CPU(input_values, target_values, expected_values);
+            kiv_ppr_svg_generator::TSvg_Generator svg_generator = kiv_ppr_svg_generator::New_Generator(result_cpu.network);
+            kiv_ppr_svg_generator::Generate(svg_generator, green_graph, blue_graph);
         }
 
     }

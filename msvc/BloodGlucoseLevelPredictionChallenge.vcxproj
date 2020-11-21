@@ -166,6 +166,8 @@
     <ClInclude Include="..\src\gpu\processor_gpu.h" />
     <ClInclude Include="..\src\gpu\network_gpu.h" />
     <ClInclude Include="..\src\gpu\mapping_gpu.h" />
+    <ClInclude Include="..\src\util\svg_generator.h" />
+    <ClInclude Include="..\src\dao\file_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp" />
@@ -179,6 +181,8 @@
     <ClCompile Include="..\src\gpu\processor_gpu.cpp" />
     <ClCompile Include="..\src\gpu\network_gpu.cpp" />
     <ClCompile Include="..\src\gpu\mapping_gpu.cpp" />
+    <ClCompile Include="..\src\util\svg_generator.cpp" />
+    <ClCompile Include="..\src\dao\file_manager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

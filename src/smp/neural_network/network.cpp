@@ -74,22 +74,63 @@ void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, cons
 
 }
 
-void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, double expected_value, unsigned training_set_id) {
+void Update_Graph_Counters(kiv_ppr_network::TNetwork& network, double relative_error) {
 
-	// Vypocitani relativni chyby a pridani do vektoru chyb v siti	
+	if (relative_error <= 0.15) {
+
+		tbb::parallel_for(size_t(0), network.layers.size() - 1, [&](size_t i) {
+			kiv_ppr_neuron::TLayer& current_layer = network.layers[i];
+
+			for (unsigned j = 0; j < current_layer.neurons.size(); j++) {
+				kiv_ppr_neuron::TNeuron& current_neuron = current_layer.neurons[j];
+
+				for (unsigned k = 0; k < current_neuron.output_weights.size(); k++) {
+					current_neuron.output_weights[k].counter_blue_graph += current_neuron.output_weights[k].current_counter;
+					current_neuron.output_weights[k].counter_green_graph += current_neuron.output_weights[k].current_counter;
+					current_neuron.output_weights[k].current_counter = 0.0;
+				}
+
+			}
+		});
+
+	}
+	else {
+
+		tbb::parallel_for(size_t(0), network.layers.size() - 1, [&](size_t i) {
+			kiv_ppr_neuron::TLayer& current_layer = network.layers[i];
+
+			for (unsigned j = 0; j < current_layer.neurons.size(); j++) {
+				kiv_ppr_neuron::TNeuron& current_neuron = current_layer.neurons[j];
+
+				for (unsigned k = 0; k < current_neuron.output_weights.size(); k++) {
+					current_neuron.output_weights[k].counter_green_graph += current_neuron.output_weights[k].current_counter;
+					current_neuron.output_weights[k].current_counter = 0.0;
+				}
+
+			}
+		});
+
+	}
+}
+
+// --- Vypocitani relativni chyby a pridani do vektoru chyb v siti ---
+void kiv_ppr_network::Save_Relative_Error(kiv_ppr_network::TNetwork& network, double expected_value) {
 	std::vector<double> result_values;
+
 	kiv_ppr_network::Get_Results(network, result_values);
 	double relative_error = kiv_ppr_network::Calculate_Relative_Error(result_values, expected_value);
 	network.relative_errors_vector.push_back(relative_error);
 
-	kiv_ppr_neuron::TLayer& output_layer = network.layers.back();
+	Update_Graph_Counters(network, relative_error);
+}
 
+void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, unsigned training_set_id) {
+	kiv_ppr_neuron::TLayer& output_layer = network.layers.back();
 
 	// Spocitani gradientu vystupni vrstvy
 	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
 		kiv_ppr_neuron::Compute_Output_Gradient(output_layer.neurons[i], target_values[target_value(training_set_id, i)]);
 	}
-
 
 	//Spocitani gradientu skrytych vrstev
 	for (unsigned i = network.layers.size() - 2; i > 0; i--) {

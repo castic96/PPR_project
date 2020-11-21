@@ -10,5 +10,12 @@
 #include	"network_gpu.h"
 
 namespace kiv_ppr_gpu {
-	void Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values);
+
+	struct TResults_GPU {
+		kiv_ppr_network_gpu::TNetworkGPU network;
+		std::vector<double> relative_errors;
+		std::vector<double> weights;
+	};
+
+	TResults_GPU Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values);
 }
