@@ -95,7 +95,7 @@ namespace kiv_ppr_network_gpu {
 		// ----------------------------------------------------------------------------------
 	};
 
-	TNetworkGPU New_Network(std::vector<cl_float> input_values, std::vector<cl_float> expected_values, unsigned num_of_training_sets);
+	kiv_ppr_network_gpu::TNetworkGPU New_Network(std::vector<double>& input_values, std::vector<double>& target_values, unsigned num_of_training_sets);
 	void Train(TNetworkGPU& network);
 	void Get_Relative_Errors_Vector(TNetworkGPU& network, std::vector<double>& expected_values, std::vector<double>& relative_errors_vector);
 	void Init_Data(TNetworkGPU& network, unsigned input_values_size, unsigned target_values_size);

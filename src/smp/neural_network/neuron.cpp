@@ -58,17 +58,17 @@ double kiv_ppr_neuron::Transfer_Function_Hidden_Der(double value) {
 	return 1.0 - (hyperbolic_tan * hyperbolic_tan);
 }
 
-double kiv_ppr_neuron::Transfer_Function_Output_Der(double value, double sum) {
+double kiv_ppr_neuron::Transfer_Function_Output_Der(double value) {
 	// TODO: prozatim pouziju derivaci tangentu..
 	/*double f = exp(value) / sum;
 	return (f * (1 - f));*/
 	return kiv_ppr_neuron::Transfer_Function_Hidden_Der(value);
 }
 
-void kiv_ppr_neuron::Compute_Output_Gradient(kiv_ppr_neuron::TNeuron& neuron, double target_value, double sum) {
+void kiv_ppr_neuron::Compute_Output_Gradient(kiv_ppr_neuron::TNeuron& neuron, double target_value) {
 	double delta = target_value - neuron.output_value;
 
-	neuron.gradient = delta * kiv_ppr_neuron::Transfer_Function_Output_Der(neuron.output_value, sum);
+	neuron.gradient = delta * kiv_ppr_neuron::Transfer_Function_Output_Der(neuron.output_value);
 }
 
 void kiv_ppr_neuron::Compute_Hidden_Gradient(kiv_ppr_neuron::TNeuron& neuron, const kiv_ppr_neuron::TLayer& next_layer) {

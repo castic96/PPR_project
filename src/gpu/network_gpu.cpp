@@ -2,12 +2,20 @@
 #include "network_gpu.h"
 
 
-void Convert_Vectors_To_Buff(std::vector<cl_float>& input_values, std::vector<cl_float>& target_values, cl_float*& input_values_buff, cl_float*& target_values_buff) {
-	std::copy(input_values.begin(), input_values.end(), input_values_buff);
+void Convert_Vectors_To_Buff(std::vector<double>& input_values, std::vector<double>& target_values, cl_float*& input_values_buff, cl_float*& target_values_buff) {
+	
+	for (unsigned i = 0; i < input_values.size(); i++) {
+		input_values_buff[i] = (cl_float)input_values[i];
+	}
+
 	input_values.clear();
 	input_values.shrink_to_fit();
 
-    std::copy(target_values.begin(), target_values.end(), target_values_buff);
+
+	for (unsigned i = 0; i < target_values.size(); i++) {
+		target_values_buff[i] = (cl_float)target_values[i];
+	}
+
 	target_values.clear();
 	target_values.shrink_to_fit();
 }
@@ -371,7 +379,7 @@ void kiv_ppr_network_gpu::Init_Data(kiv_ppr_network_gpu::TNetworkGPU& network, u
 	Write_Init_Data_To_Buffers(network, input_values_size, target_values_size);
 }
 
-kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<cl_float> input_values, std::vector<cl_float> target_values, unsigned num_of_training_sets) {
+kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<double>& input_values, std::vector<double>& target_values, unsigned num_of_training_sets) {
     kiv_ppr_network_gpu::TNetworkGPU new_network;
 	std::vector<cl::Device> devices_gpu;
 	std::vector<cl::Device> devices_cpu;

@@ -160,7 +160,7 @@
     <ClInclude Include="..\src\smp\neural_network\neuron.h" />
     <ClInclude Include="..\src\smp\neural_network\synapse.h" />
     <ClInclude Include="..\src\util\utils.h" />
-    <ClInclude Include="..\src\util\input_parser.h" />
+    <ClInclude Include="..\src\dao\database_loader.h" />
     <ClInclude Include="..\src\constants.h" />
     <ClInclude Include="..\src\smp\processor_smp.h" />
     <ClInclude Include="..\src\gpu\processor_gpu.h" />
@@ -174,7 +174,7 @@
     <ClCompile Include="..\src\smp\neural_network\neuron.cpp" />
     <ClCompile Include="..\src\smp\neural_network\synapse.cpp" />
     <ClCompile Include="..\src\util\utils.cpp" />
-    <ClCompile Include="..\src\util\input_parser.cpp" />
+    <ClCompile Include="..\src\dao\database_loader.cpp" />
     <ClCompile Include="..\src\smp\processor_smp.cpp" />
     <ClCompile Include="..\src\gpu\processor_gpu.cpp" />
     <ClCompile Include="..\src\gpu\network_gpu.cpp" />

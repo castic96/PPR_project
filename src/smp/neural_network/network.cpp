@@ -1,8 +1,18 @@
 #include<vector>
 #include<cassert>
 #include "network.h"
-#include "../../util/utils.h"
 
+
+int input_value(int set_num, int n) {
+	return set_num * INPUT_LAYER_NEURONS_COUNT + n;
+}
+
+
+// ----- BUFFER: target_data -----
+// --- Pristup k trenovacim datum - ocekavane vstupy ---
+int target_value(int set_num, int n) {
+	return set_num * OUTPUT_LAYER_NEURONS_COUNT + n;
+}
 
 kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigned>& topology) {
 	kiv_ppr_network::TNetwork new_network;
@@ -30,13 +40,11 @@ kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigne
 	return new_network;
 }
 
-void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double> &input_values) {
-	//TODO: možná smazat..
-	assert(input_values.size() == network.layers[0].neurons.size() - 1);
+void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double> &input_values, unsigned training_set_id) {
 
 	// Prirazeni vstupnich hodnot do vstupni vrstvy (vstupnich neuronu)
-	for (unsigned i = 0; i < input_values.size(); i++) {
-		network.layers[0].neurons[i].output_value = kiv_ppr_utils::Risk_Function(input_values[i]);
+	for (unsigned i = 0; i < INPUT_LAYER_NEURONS_COUNT; i++) {
+		network.layers[0].neurons[i].output_value = input_values[input_value(training_set_id, i)];
 	}
 
 	// Spusteni forward propagation pro skryte vrstvy
@@ -66,7 +74,7 @@ void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, cons
 
 }
 
-void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, double expected_value) {
+void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, double expected_value, unsigned training_set_id) {
 
 	// Vypocitani relativni chyby a pridani do vektoru chyb v siti	
 	std::vector<double> result_values;
@@ -74,33 +82,12 @@ void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::v
 	double relative_error = kiv_ppr_network::Calculate_Relative_Error(result_values, expected_value);
 	network.relative_errors_vector.push_back(relative_error);
 
-	// Vypoètení kumulativní chyby (RMS výstupních chyb)
-	// TODO: asi k nièemu, pak odstranit
-	double standard_error = 0.0;
 	kiv_ppr_neuron::TLayer& output_layer = network.layers.back();
 
-	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
-		double delta = target_values[i] - output_layer.neurons[i].output_value;
-
-		standard_error += delta * delta;
-	}
-
-	standard_error /= output_layer.neurons.size() - 1;
-
-	network.error = sqrt(standard_error);
-
-	network.recent_average_error =
-		(network.recent_average_error * RECENT_AVERAGE_SMOOTHING_FACTOR + network.error) /
-		(RECENT_AVERAGE_SMOOTHING_FACTOR + 1.0);
 
 	// Spocitani gradientu vystupni vrstvy
-	double sum = 0.0;
 	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
-		sum += exp(output_layer.neurons[i].output_value);
-	}
-
-	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
-		kiv_ppr_neuron::Compute_Output_Gradient(output_layer.neurons[i], target_values[i], sum);
+		kiv_ppr_neuron::Compute_Output_Gradient(output_layer.neurons[i], target_values[target_value(training_set_id, i)]);
 	}
 
 

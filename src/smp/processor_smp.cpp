@@ -1,5 +1,6 @@
 #include "processor_smp.h"
 
+
 void Create_Topology(std::vector<unsigned>& topology) {
     topology.clear();
 
@@ -18,25 +19,7 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
-void Print_Vector(std::string label, std::vector<double>& vector)
-{
-    std::cout << label << " ";
-
-    for (unsigned i = 0; i < vector.size(); ++i) {
-        std::cout << vector[i] << " ";
-    }
-
-    std::cout << std::endl;
-}
-
-void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name) {
-
-    // Otevreni databaze
-    kiv_ppr_db_connector::TData_Reader reader = kiv_ppr_db_connector::New_Reader(db_name);
-
-    if (!kiv_ppr_db_connector::Open_Database(reader)) {
-        exit(EXIT_FAILURE);
-    }
+void kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
 
     // Vytvoreni topologie
     std::vector<unsigned> topology;
@@ -46,65 +29,41 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
     std::vector<kiv_ppr_network::TNetwork> neural_networks;
     Create_Neural_Networks(neural_networks, topology);
 
-    // Nacteni jednoho vstupu
-    std::vector<kiv_ppr_db_connector::TElement> input_data = Load_Data(reader);
-    kiv_ppr_db_connector::Close_Database(reader);
-
-    kiv_ppr_input_parser::TInput current_input;
-    current_input = kiv_ppr_input_parser::Read_Next(input_data, START_ID, predicted_minutes);
-
-    // Vytvoreni vektoru pro vstupni a ocekavane (cilove) hodnoty
-    std::vector<double> input_values;
-    std::vector<double> result_values;
-    std::vector<double> target_values;
-
-
-    // Zpracovani vsech validnich vstupu
-    int counter = 0;
     double relative_error = 0.0;
     std::vector<double> total_errors;
 
-    while (current_input.valid) {
+    unsigned num_of_training_sets = expected_values.size();
 
-        // Tisk poradi
-        counter++;
+    for (unsigned i = 0; i < num_of_training_sets; i++) {
 
-        // Nacteni vstupnich hodnot
-        input_values = current_input.values;
-
-        // Nacteni cilovych hodnot
-        target_values = kiv_ppr_utils::Get_Target_Values_Vector(current_input.expected_value);
-
-        tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t i) {
+        tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t j) {
 
             // Spusteni feed forward propagation
-            kiv_ppr_network::Feed_Forward_Prop(neural_networks[i], input_values);
+            kiv_ppr_network::Feed_Forward_Prop(neural_networks[j], input_values, i);
 
             // Spusteni back propagation
-            kiv_ppr_network::Back_Prop(neural_networks[i], target_values, current_input.expected_value);
+            kiv_ppr_network::Back_Prop(neural_networks[j], target_values, expected_values[i], i);
 
             });
 
-        // Nacteni dalsiho vstupu
-        current_input = kiv_ppr_input_parser::Read_Next(input_data, current_input.first_index, predicted_minutes);
     }
 
-    for (unsigned i = 0; i < neural_networks.size(); i++) {
-        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(neural_networks[i].relative_errors_vector));
+    for (unsigned j = 0; j < neural_networks.size(); j++) {
+        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(neural_networks[j].relative_errors_vector));
     }
 
     unsigned min_total_error_index = 0;
 
-    for (unsigned i = 0; i < total_errors.size(); i++) {
-        if (total_errors[i] < total_errors[min_total_error_index]) {
-            min_total_error_index = i;
+    for (unsigned j = 0; j < total_errors.size(); j++) {
+        if (total_errors[j] < total_errors[min_total_error_index]) {
+            min_total_error_index = j;
         }
     }
 
     // Vypis vsech chyb
     std::cout << "TOTAL ERRORS: ";
-    for (unsigned i = 0; i < total_errors.size(); i++) {
-        std::cout << total_errors[i] << " ";
+    for (unsigned j = 0; j < total_errors.size(); j++) {
+        std::cout << total_errors[j] << " ";
     }
     std::cout << std::endl;
 
@@ -114,15 +73,5 @@ void kiv_ppr_smp::Run(unsigned predicted_minutes, char*& db_name, char*& weights
         << total_errors[min_total_error_index]
         << ", NETWORK INDEX: " << min_total_error_index
         << std::endl;
-
-
-    /*
-    if (weights_file_name != NULL) {
-
-    }
-    else {
-
-    }
-    */
 
 }

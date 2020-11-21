@@ -7,9 +7,8 @@
 #include    <iostream>
 #include    <string>
 #include    <CL/cl2.hpp>
-#include    "../dao/database_connector.h"
 #include	"network_gpu.h"
 
 namespace kiv_ppr_gpu {
-	void Run(unsigned predicted_minutes, char*& db_name, char*& weights_file_name);
+	void Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values);
 }

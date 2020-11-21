@@ -25,8 +25,8 @@ namespace kiv_ppr_neuron {
 	double Transfer_Function_Hidden(double value);
 	double Transfer_Function_Output(double value);
 	double Transfer_Function_Hidden_Der(double value);
-	double Transfer_Function_Output_Der(double value, double sum);
-	void Compute_Output_Gradient(TNeuron& neuron, double target_value, double sum);
+	double Transfer_Function_Output_Der(double value);
+	void Compute_Output_Gradient(TNeuron& neuron, double target_value);
 	void Compute_Hidden_Gradient(TNeuron& neuron, const TLayer& next_layer);
 	void Update_Input_Weight(TNeuron& neuron, TLayer& previous_layer);
 	double Sum_Dow(TNeuron& neuron, const TLayer& next_layer);
