@@ -14,7 +14,7 @@ namespace kiv_ppr_svg_generator {
 	const unsigned ellipse_radius_quarter = ellipse_radius / 4;
 	const unsigned ellipse_stroke_width = 2;
 	const unsigned line_stroke_width = 1;
-	const unsigned text_font_size = 11;
+	const unsigned text_font_size = 10;
 	const unsigned neurons_space_y = 300;
 	const unsigned layers_space_x = 1500;
 	const unsigned graph_min_value = 0;
@@ -52,7 +52,7 @@ namespace kiv_ppr_svg_generator {
 		"\" fill-opacity=\"null\" stroke-opacity=\"null\" stroke-width=\"" + std::to_string(line_stroke_width) + "\" fill=\"none\"/>";
 
 	const std::string svg_text =
-		"<text xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Helvetica, Arial, sans-serif\" font-size=\"" + 
+		"<text font-weight=\"bold\" xml:space=\"preserve\" text-anchor=\"start\" font-family=\"Helvetica, Arial, sans-serif\" font-size=\"" +
 		std::to_string(text_font_size) + "\" y=\"" + y_proxy + "\" x=\"" + x_proxy +
 		"\" stroke-width=\"0\" stroke =\"#000\" fill=\"#000000\">" + text_proxy + "</text>";
 
