@@ -4,7 +4,9 @@ kiv_ppr_svg_generator::TSvg_Generator kiv_ppr_svg_generator::New_Generator(kiv_p
 	kiv_ppr_svg_generator::TSvg_Generator new_generator;
 
 	new_generator.network = network;
+	new_generator.min_counter_green_graph = 0.0;
 	new_generator.max_counter_green_graph = 0.0;
+	new_generator.min_counter_blue_graph = 0.0;
 	new_generator.max_counter_blue_graph = 0.0;
 	new_generator.max_neurons = 0;
 
@@ -26,7 +28,9 @@ bool Set_Svg_Value(std::string& svg_object, const std::string& old_value, const 
 void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 	std::vector<kiv_ppr_neuron::TLayer> layers = generator.network.layers;
 
+	double min_counter_green_graph = 0.0;
 	double max_counter_green_graph = 0.0;
+	double min_counter_blue_graph = 0.0;
 	double max_counter_blue_graph = 0.0;
 	unsigned max_neurons = 0;
 	unsigned neurons_count;
@@ -46,8 +50,16 @@ void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 				double current_counter_green_graph = current_neuron.output_weights[k].counter_green_graph;
 				double current_counter_blue_graph = current_neuron.output_weights[k].counter_blue_graph;
 
+				if (current_counter_green_graph < min_counter_green_graph) {
+					min_counter_green_graph = current_counter_green_graph;
+				}
+
 				if (current_counter_green_graph > max_counter_green_graph) {
 					max_counter_green_graph = current_counter_green_graph;
+				}
+
+				if (current_counter_blue_graph < min_counter_blue_graph) {
+					min_counter_blue_graph = current_counter_blue_graph;
 				}
 
 				if (current_counter_blue_graph > max_counter_blue_graph) {
@@ -66,7 +78,9 @@ void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 		max_neurons = neurons_count;
 	}
 
+	generator.min_counter_blue_graph = min_counter_blue_graph;
 	generator.max_counter_blue_graph = max_counter_blue_graph;
+	generator.min_counter_green_graph = min_counter_green_graph;
 	generator.max_counter_green_graph = max_counter_green_graph;
 	generator.max_neurons = max_neurons;
 
@@ -115,9 +129,12 @@ std::string Generate_Svg_Neuron(unsigned x, unsigned y) {
 	return svg_neuron;
 }
 
-unsigned Scale_Value(double count, double max_value)
+unsigned Scale_Value(double count, double min_value, double max_value)
 {
-	return static_cast<unsigned int>((count / max_value) * kiv_ppr_svg_generator::color_max_value);
+	return (int)((count - min_value) * 
+		(kiv_ppr_svg_generator::graph_max_value - kiv_ppr_svg_generator::graph_min_value) / 
+		(max_value - min_value) + kiv_ppr_svg_generator::graph_min_value);
+	//return static_cast<unsigned int>((count / max_value) * kiv_ppr_svg_generator::color_max_value);
 }
 
 void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
@@ -217,8 +234,8 @@ void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::stri
 
 				double counter_green_graph = previous_layer.neurons[k].output_weights[j].counter_green_graph;
 				double counter_blue_graph = previous_layer.neurons[k].output_weights[j].counter_blue_graph;
-				unsigned green_value = Scale_Value(counter_green_graph, generator.max_counter_green_graph);
-				unsigned blue_value = Scale_Value(counter_blue_graph, generator.max_counter_blue_graph);
+				unsigned green_value = Scale_Value(counter_green_graph, generator.min_counter_green_graph, generator.max_counter_green_graph);
+				unsigned blue_value = Scale_Value(counter_blue_graph, generator.min_counter_blue_graph, generator.max_counter_blue_graph);
 
 				// Barva synapse
 				std::string green_color = "rgb(0, " + std::to_string(green_value) + ", 0)";

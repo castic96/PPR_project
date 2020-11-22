@@ -17,7 +17,8 @@ namespace kiv_ppr_svg_generator {
 	const unsigned text_font_size = 11;
 	const unsigned neurons_space_y = 300;
 	const unsigned layers_space_x = 1500;
-	const unsigned color_max_value = 255;
+	const unsigned graph_min_value = 0;
+	const unsigned graph_max_value = 255;
 
 	// --- Zastupci atributu SVG objektu ---
 	const std::string x_proxy = "x_proxy";
@@ -59,7 +60,9 @@ namespace kiv_ppr_svg_generator {
 
 	struct TSvg_Generator {
 		kiv_ppr_network::TNetwork network;
+		double min_counter_green_graph;
 		double max_counter_green_graph;
+		double min_counter_blue_graph;
 		double max_counter_blue_graph;
 		unsigned max_neurons;
 		std::string frame;
