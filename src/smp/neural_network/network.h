@@ -13,8 +13,6 @@ namespace kiv_ppr_network {
 	struct TNetwork {
 		std::vector<kiv_ppr_neuron::TLayer> layers; // layers[pocet vrstev][pocet neuronu]
 		std::vector<double> relative_errors_vector;
-		double average_relative_error = 0.0;
-		double standard_deviation_rel_errs = 0.0;
 	};
 
 	TNetwork New_Network(const std::vector<unsigned>& topology);

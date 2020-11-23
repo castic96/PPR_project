@@ -19,26 +19,7 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
-std::string Generate_Csv(kiv_ppr_network::TNetwork& network) {
-    std::string generated_str;
-    std::vector<double> relative_errors = network.relative_errors_vector;
-    unsigned relative_errors_size = relative_errors.size();
-    unsigned step = relative_errors_size / 100;
-
-    generated_str.append(std::to_string(network.average_relative_error)).append(",\n");
-    generated_str.append(std::to_string(network.standard_deviation_rel_errs)).append(",\n");
-
-    std::sort(relative_errors.begin(), relative_errors.end());
-
-    for (unsigned i = 0; i < relative_errors_size; i += step) {
-        generated_str.append(std::to_string(relative_errors[i]));
-        generated_str.append(",");
-    }
-
-    return generated_str;
-}
-
-std::string Generate_Neural_Ini(kiv_ppr_network::TNetwork& network) {
+std::string Generate_Neural_Ini_CPU(kiv_ppr_network::TNetwork& network) {
     std::vector<kiv_ppr_neuron::TLayer> layers = network.layers;
     std::string generated_str;
 
@@ -127,10 +108,6 @@ unsigned Find_Best_Network_Index(std::vector<kiv_ppr_network::TNetwork>& neural_
 
     for (unsigned i = 0; i < neural_networks.size(); i++) {
         kiv_ppr_network::TNetwork& current_network = neural_networks[i];
-
-        current_network.average_relative_error = kiv_ppr_utils::Calc_Average_Relative_Error(current_network.relative_errors_vector);
-        current_network.standard_deviation_rel_errs = kiv_ppr_utils::Calc_Standard_Deviation(current_network.relative_errors_vector);
-
         total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(current_network.relative_errors_vector));
     }
 
@@ -179,8 +156,8 @@ kiv_ppr_smp::TResults_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& inp
     result.network = best_network;
     result.relative_errors = best_network.relative_errors_vector;
     result.weights = Get_Weights(best_network);
-    result.neural_ini_str = Generate_Neural_Ini(best_network);
-    result.csv_str = Generate_Csv(best_network);
+    result.neural_ini_str = Generate_Neural_Ini_CPU(best_network);
+    result.csv_str = kiv_ppr_utils::Generate_Csv(best_network.relative_errors_vector);
 
     return result;
 }

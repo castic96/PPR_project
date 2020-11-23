@@ -103,3 +103,23 @@ double kiv_ppr_utils::Calculate_Total_Error(std::vector<double> relative_errors_
     return kiv_ppr_utils::Calc_Average_Relative_Error(relative_errors_vector) + 
             kiv_ppr_utils::Calc_Standard_Deviation(relative_errors_vector);
 }
+
+std::string kiv_ppr_utils::Generate_Csv(std::vector<double> relative_errors_vector) {
+    std::string generated_str;
+    unsigned relative_errors_size = relative_errors_vector.size();
+    unsigned step = relative_errors_size / 100;
+
+    generated_str.append(std::to_string(kiv_ppr_utils::Calc_Average_Relative_Error(relative_errors_vector)));
+    generated_str.append(",\n");
+    generated_str.append(std::to_string(kiv_ppr_utils::Calc_Standard_Deviation(relative_errors_vector)));
+    generated_str.append(",\n");
+
+    std::sort(relative_errors_vector.begin(), relative_errors_vector.end());
+
+    for (unsigned i = 0; i < relative_errors_size; i += step) {
+        generated_str.append(std::to_string(relative_errors_vector[i]));
+        generated_str.append(",");
+    }
+
+    return generated_str;
+}

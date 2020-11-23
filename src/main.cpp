@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     unsigned predicted_minutes;
     char* db_name;
     char* weights_file_name;
-    bool run_gpu = false;
+    bool run_gpu = true;
 
     Prepare_Args(argc, argv, predicted_minutes, db_name, weights_file_name);
 

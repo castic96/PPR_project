@@ -28,7 +28,7 @@ int output_neuron_i(int i) {
 	return hidden2_neuron_i(i) + HIDDEN2_LAYER_NEURONS_COUNT + BIAS; 
 }
 
-// --- Vahy mezi neurony (bez biasu) ---
+// --- Vahy mezi neurony ---
 int weight_input_hidden1(int input, int hidden1) { 
 	return 100 + input * HIDDEN1_LAYER_NEURONS_COUNT + hidden1;  
 }

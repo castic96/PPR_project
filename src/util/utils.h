@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vector>
-#include "../constants.h"
+#include    <vector>
+#include    <string>
+#include    "../constants.h"
 
 namespace kiv_ppr_utils {
 
@@ -34,4 +35,5 @@ namespace kiv_ppr_utils {
     double Calc_Average_Relative_Error(std::vector<double> relative_errors_vector);
     double Calc_Standard_Deviation(std::vector<double> relative_errors_vector);
     double Calculate_Total_Error(std::vector<double> relative_errors_vector);
+    std::string Generate_Csv(std::vector<double> relative_errors_vector);
 }
