@@ -3,15 +3,15 @@
 #include "network.h"
 
 
-int input_value(int set_num, int n) {
-	return set_num * INPUT_LAYER_NEURONS_COUNT + n;
+int input_value(int set_num, int n, unsigned input_layer_neurons_count) {
+	return set_num * input_layer_neurons_count + n;
 }
 
 
 // ----- BUFFER: target_data -----
 // --- Pristup k trenovacim datum - ocekavane vstupy ---
-int target_value(int set_num, int n) {
-	return set_num * OUTPUT_LAYER_NEURONS_COUNT + n;
+int target_value(int set_num, int n, unsigned output_layer_neurons_count) {
+	return set_num * output_layer_neurons_count + n;
 }
 
 kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigned>& topology) {
@@ -40,11 +40,11 @@ kiv_ppr_network::TNetwork kiv_ppr_network::New_Network(const std::vector<unsigne
 	return new_network;
 }
 
-void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double> &input_values, unsigned training_set_id) {
+void kiv_ppr_network::Feed_Forward_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double> &input_values, unsigned training_set_id, unsigned input_layer_neurons_count) {
 
 	// Prirazeni vstupnich hodnot do vstupni vrstvy (vstupnich neuronu)
-	for (unsigned i = 0; i < INPUT_LAYER_NEURONS_COUNT; i++) {
-		network.layers[0].neurons[i].output_value = input_values[input_value(training_set_id, i)];
+	for (unsigned i = 0; i < input_layer_neurons_count; i++) {
+		network.layers[0].neurons[i].output_value = input_values[input_value(training_set_id, i, input_layer_neurons_count)];
 	}
 
 	// Spusteni forward propagation pro skryte vrstvy
@@ -124,12 +124,20 @@ void kiv_ppr_network::Save_Relative_Error(kiv_ppr_network::TNetwork& network, do
 	Update_Graph_Counters(network, relative_error);
 }
 
-void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, unsigned training_set_id) {
+void kiv_ppr_network::Add_Result_Value(kiv_ppr_network::TNetwork& network, std::vector<double>& result_values) {
+	std::vector<double> output;
+
+	kiv_ppr_network::Get_Results(network, output);
+	double value = kiv_ppr_network::Calculate_Result_Value(output);
+	result_values.push_back(value);
+}
+
+void kiv_ppr_network::Back_Prop(kiv_ppr_network::TNetwork& network, const std::vector<double>& target_values, unsigned training_set_id, unsigned output_layer_neurons_count) {
 	kiv_ppr_neuron::TLayer& output_layer = network.layers.back();
 
 	// Spocitani gradientu vystupni vrstvy
 	for (unsigned i = 0; i < output_layer.neurons.size() - 1; i++) {
-		kiv_ppr_neuron::Compute_Output_Gradient(output_layer.neurons[i], target_values[target_value(training_set_id, i)]);
+		kiv_ppr_neuron::Compute_Output_Gradient(output_layer.neurons[i], target_values[target_value(training_set_id, i, output_layer_neurons_count)]);
 	}
 
 	//Spocitani gradientu skrytych vrstev
@@ -162,7 +170,7 @@ void kiv_ppr_network::Get_Results(kiv_ppr_network::TNetwork& network, std::vecto
 
 }
 
-double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_values, double expected_value) {
+double kiv_ppr_network::Calculate_Relative_Error(std::vector<double>& result_values, double expected_value) {
 
 	unsigned result_index = 0;
 	for (unsigned i = 0; i < result_values.size(); i++) {
@@ -174,4 +182,16 @@ double kiv_ppr_network::Calculate_Relative_Error(std::vector<double> result_valu
 	double result_value = kiv_ppr_utils::Band_Index_To_Level(result_index);
 
 	return (std::abs(result_value - expected_value) / expected_value);
+}
+
+double kiv_ppr_network::Calculate_Result_Value(std::vector<double>& output) {
+
+	unsigned result_index = 0;
+	for (unsigned i = 0; i < output.size(); i++) {
+		if (output[i] > output[result_index]) {
+			result_index = i;
+		}
+	}
+
+	return kiv_ppr_utils::Band_Index_To_Level(result_index);
 }

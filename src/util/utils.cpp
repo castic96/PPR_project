@@ -123,3 +123,44 @@ std::string kiv_ppr_utils::Generate_Csv(std::vector<double> relative_errors_vect
 
     return generated_str;
 }
+
+std::string kiv_ppr_utils::Generate_Result_File(std::vector<double>& input_values, std::vector<double>& result_values, std::vector<double>& expected_values, unsigned input_layer_neurons_count) {
+    std::string generated_str;
+    unsigned train_sets_count = expected_values.size();
+
+    generated_str.append("----------------------------------------------------------------------------------------------");
+    generated_str.append("\n");
+    generated_str.append("------------------------------------ PREDICTION RESULTS --------------------------------------");
+    generated_str.append("\n");
+    generated_str.append("----------------------------------------------------------------------------------------------");
+    generated_str.append("\n");
+
+    generated_str.append("Number of training sets: ");
+    generated_str.append(std::to_string(train_sets_count));
+    generated_str.append("\n");
+
+    generated_str.append("----------------------------------------------------------------------------------------------");
+    generated_str.append("\n");
+    generated_str.append("\n");
+
+    for (unsigned i = 0; i < train_sets_count; i++) {
+        generated_str.append("input: ");
+
+        for (unsigned j = 0; j < input_layer_neurons_count; j++) {
+            generated_str.append(std::to_string(input_values[j + i * input_layer_neurons_count]));
+            generated_str.append("  ");
+        }
+
+        generated_str.append("\n");
+
+        generated_str.append("result: ");
+        generated_str.append(std::to_string(result_values[i]));
+        generated_str.append("\n");
+
+        generated_str.append("expected: ");
+        generated_str.append(std::to_string(expected_values[i]));
+        generated_str.append("\n\n");   
+    }
+
+    return generated_str;
+}

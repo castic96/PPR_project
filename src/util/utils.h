@@ -36,4 +36,8 @@ namespace kiv_ppr_utils {
     double Calc_Standard_Deviation(std::vector<double> relative_errors_vector);
     double Calculate_Total_Error(std::vector<double> relative_errors_vector);
     std::string Generate_Csv(std::vector<double> relative_errors_vector);
+    std::string Generate_Result_File(std::vector<double>& input_values, 
+        std::vector<double>& result_values, 
+        std::vector<double>& expected_values, 
+        unsigned input_layer_neurons_count);
 }

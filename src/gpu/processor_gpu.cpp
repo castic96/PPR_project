@@ -90,8 +90,8 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
     return generated_str;
 }
 
-kiv_ppr_gpu::TResults_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
-    kiv_ppr_gpu::TResults_GPU result;
+kiv_ppr_gpu::TResults_Training_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+    kiv_ppr_gpu::TResults_Training_GPU result;
     std::vector<double> relative_errors_vector;
 
     unsigned input_values_size = input_values.size();

@@ -32,16 +32,18 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_database_loader::Load_From_D
 
 void kiv_ppr_database_loader::Load_Inputs_Training(std::vector<kiv_ppr_db_connector::TElement>& input_data,
     std::vector<double>& input_values,
+    std::vector<double>& input_values_risk,
     std::vector<double>& target_values,
     std::vector<double>& expected_values,
-    unsigned predicted_minutes) {
+    unsigned predicted_minutes, 
+    unsigned input_layer_neurons_count) {
 
     std::vector<double> current_target_values;
     unsigned index = 0;
     bool run_again = false;
 
     int prediction_places = Compute_Prediction_Places(predicted_minutes);
-    int limit = COUNT_OF_INPUT_VALUES + prediction_places;
+    int limit = input_layer_neurons_count + prediction_places;
 
     while (true) {
 
@@ -59,8 +61,9 @@ void kiv_ppr_database_loader::Load_Inputs_Training(std::vector<kiv_ppr_db_connec
 
         } while (run_again);
 
-        for (unsigned i = index; i < index + COUNT_OF_INPUT_VALUES; i++) {
-            input_values.push_back(kiv_ppr_utils::Risk_Function(input_data[i].ist));
+        for (unsigned i = index; i < index + input_layer_neurons_count; i++) {
+            input_values.push_back(input_data[i].ist);
+            input_values_risk.push_back(kiv_ppr_utils::Risk_Function(input_data[i].ist));
         }
 
         expected_values.push_back(input_data[index + limit - 1].ist);
