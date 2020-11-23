@@ -8,6 +8,12 @@
 #include    "util/svg_generator.h"
 #include    "dao/file_manager.h"
 
+#define     CSV_PATH                "../out/errors.csv"
+#define     NEURAL_INI_PATH         "../out/neural.ini"
+#define     GREEN_GRAPH_PATH        "../out/green_graph.svg"
+#define     BLUE_GRAPH_PATH         "../out/blue_graph.svg"
+
+
 void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, char*& weights_file_name) {
 
     if (argc <= 1) {
@@ -72,12 +78,12 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
             kiv_ppr_svg_generator::TSvg_Generator svg_generator = kiv_ppr_svg_generator::New_Generator(result_cpu.network);
             kiv_ppr_svg_generator::Generate(svg_generator, green_graph, blue_graph);
 
-            kiv_ppr_file_manager::Save_Svg_File("green_graph.svg", green_graph);
-            kiv_ppr_file_manager::Save_Svg_File("blue_graph.svg", blue_graph);
+            kiv_ppr_file_manager::Save_Svg_File(GREEN_GRAPH_PATH, green_graph);
+            kiv_ppr_file_manager::Save_Svg_File(BLUE_GRAPH_PATH, blue_graph);
         }
 
-    kiv_ppr_file_manager::Save_Ini_File("neural.ini", neural_ini_str);
-    kiv_ppr_file_manager::Save_Csv_File("errors.csv", csv_str);
+    kiv_ppr_file_manager::Save_Ini_File(NEURAL_INI_PATH, neural_ini_str);
+    kiv_ppr_file_manager::Save_Csv_File(CSV_PATH, csv_str);
 
     }
 
@@ -101,7 +107,7 @@ int main(int argc, char** argv)
     unsigned predicted_minutes;
     char* db_name;
     char* weights_file_name;
-    bool run_gpu = true;
+    bool run_gpu = false;
 
     Prepare_Args(argc, argv, predicted_minutes, db_name, weights_file_name);
 
