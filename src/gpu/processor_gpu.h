@@ -14,7 +14,6 @@ namespace kiv_ppr_gpu {
 	struct TResults_GPU {
 		kiv_ppr_network_gpu::TNetworkGPU network;
 		std::vector<double> relative_errors;
-		std::vector<std::vector<double>> weights;
 		std::string neural_ini_str;
 		std::string csv_str;
 	};

@@ -110,16 +110,10 @@ kiv_ppr_gpu::TResults_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& inp
 
     kiv_ppr_network_gpu::Get_Relative_Errors_Vector(network, expected_values, relative_errors_vector);
 
-
-    double error = kiv_ppr_utils::Calculate_Total_Error(relative_errors_vector);
-
     result.network = network;
     result.relative_errors = relative_errors_vector;
-    result.weights;
     result.neural_ini_str = Generate_Neural_Ini_GPU(network);
     result.csv_str = kiv_ppr_utils::Generate_Csv(relative_errors_vector);
-
-    std::cout << "Chyba: " << error << std::endl;
 
     kiv_ppr_network_gpu::Clean(network);
 
