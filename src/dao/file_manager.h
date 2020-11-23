@@ -7,5 +7,7 @@
 
 namespace kiv_ppr_file_manager {
 	void Save_Svg_File(std::string file_path, std::string& graph);
+	void Save_Ini_File(std::string file_path, std::string& neural_params);
+	void Save_Csv_File(std::string file_path, std::string& errors);
 }
 

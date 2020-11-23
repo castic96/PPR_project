@@ -19,6 +19,130 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
 
 }
 
+std::string Generate_Csv(kiv_ppr_network::TNetwork& network) {
+    std::string generated_str;
+    std::vector<double> relative_errors = network.relative_errors_vector;
+    unsigned relative_errors_size = relative_errors.size();
+    unsigned step = relative_errors_size / 100;
+
+    generated_str.append(std::to_string(network.average_relative_error)).append(",\n");
+    generated_str.append(std::to_string(network.standard_deviation_rel_errs)).append(",\n");
+
+    std::sort(relative_errors.begin(), relative_errors.end());
+
+    for (unsigned i = 0; i < relative_errors_size; i += step) {
+        generated_str.append(std::to_string(relative_errors[i]));
+        generated_str.append(",");
+    }
+
+    return generated_str;
+}
+
+std::string Generate_Neural_Ini(kiv_ppr_network::TNetwork& network) {
+    std::vector<kiv_ppr_neuron::TLayer> layers = network.layers;
+    std::string generated_str;
+
+    for (unsigned i = 1; i < layers.size(); i++) {
+        kiv_ppr_neuron::TLayer& current_layer = layers[i];
+        unsigned current_neurons_count = current_layer.neurons.size();
+
+        kiv_ppr_neuron::TLayer& previous_layer = layers[i - 1];
+        unsigned previous_neurons_count = previous_layer.neurons.size();
+
+        if (i < layers.size() - 1) {
+            generated_str.append("[hidden_layer_").append(std::to_string(i)).append("]\n");
+        }
+        else {
+            generated_str.append("[output_layer]\n");
+        }
+
+        for (unsigned j = 0; j < current_neurons_count - 1; j++) {
+
+            for (unsigned k = 0; k < previous_neurons_count; k++) {
+
+                if (k < previous_neurons_count - 1) {
+
+                    generated_str.append("Neuron").append(std::to_string(j));
+                    generated_str.append("_");
+                    generated_str.append("Weight").append(std::to_string(k));
+                    generated_str.append("=");
+                    generated_str.append(std::to_string(previous_layer.neurons[k].output_weights[j].weight));
+                    generated_str.append("\n");
+                
+                }
+                else {
+
+                    generated_str.append("Neuron").append(std::to_string(j));
+                    generated_str.append("_");
+                    generated_str.append("Bias");
+                    generated_str.append("=");
+                    generated_str.append(std::to_string(previous_layer.neurons[k].output_weights[j].weight));
+                    generated_str.append("\n");
+
+                }
+
+            }
+
+        }
+
+        generated_str.append("\n");
+    }
+
+    return generated_str;
+}
+
+std::vector<std::vector<double>> Get_Weights(kiv_ppr_network::TNetwork& network) {
+    std::vector<std::vector<double>> weights;
+    std::vector<kiv_ppr_neuron::TLayer> layers = network.layers;
+    std::vector<double> current_weights;
+
+    for (unsigned i = 1; i < layers.size(); i++) {
+        kiv_ppr_neuron::TLayer& current_layer = layers[i];
+        unsigned current_neurons_count = current_layer.neurons.size();
+
+        kiv_ppr_neuron::TLayer& previous_layer = layers[i - 1];
+        unsigned previous_neurons_count = previous_layer.neurons.size();
+
+        current_weights.clear();
+
+        for (unsigned j = 0; j < current_neurons_count - 1; j++) {
+
+            for (unsigned k = 0; k < previous_neurons_count; k++) {
+
+                current_weights.push_back(previous_layer.neurons[k].output_weights[j].weight);
+            
+            }
+
+        }
+
+        weights.push_back(current_weights);
+    }
+
+    return weights;
+}
+
+unsigned Find_Best_Network_Index(std::vector<kiv_ppr_network::TNetwork>& neural_networks) {
+    unsigned index = 0;
+    std::vector<double> total_errors;
+
+    for (unsigned i = 0; i < neural_networks.size(); i++) {
+        kiv_ppr_network::TNetwork& current_network = neural_networks[i];
+
+        current_network.average_relative_error = kiv_ppr_utils::Calc_Average_Relative_Error(current_network.relative_errors_vector);
+        current_network.standard_deviation_rel_errs = kiv_ppr_utils::Calc_Standard_Deviation(current_network.relative_errors_vector);
+
+        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(current_network.relative_errors_vector));
+    }
+
+    for (unsigned i = 0; i < total_errors.size(); i++) {
+        if (total_errors[i] < total_errors[index]) {
+            index = i;
+        }
+    }
+
+    return index;
+}
+
 kiv_ppr_smp::TResults_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
     kiv_ppr_smp::TResults_CPU result;
 
@@ -29,9 +153,6 @@ kiv_ppr_smp::TResults_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& inp
     // Vytvoreni n neuronovych siti s danou topologii
     std::vector<kiv_ppr_network::TNetwork> neural_networks;
     Create_Neural_Networks(neural_networks, topology);
-
-    double relative_error = 0.0;
-    std::vector<double> total_errors;
 
     unsigned num_of_training_sets = expected_values.size();
 
@@ -52,35 +173,14 @@ kiv_ppr_smp::TResults_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& inp
 
     }
 
-    for (unsigned j = 0; j < neural_networks.size(); j++) {
-        total_errors.push_back(kiv_ppr_utils::Calculate_Total_Error(neural_networks[j].relative_errors_vector));
-    }
+    // Nalezeni nejlepe natrenovane site
+    kiv_ppr_network::TNetwork& best_network = neural_networks[Find_Best_Network_Index(neural_networks)];
 
-    unsigned min_total_error_index = 0;
-
-    for (unsigned j = 0; j < total_errors.size(); j++) {
-        if (total_errors[j] < total_errors[min_total_error_index]) {
-            min_total_error_index = j;
-        }
-    }
-
-    result.network = neural_networks[min_total_error_index];
-    result.relative_errors;
-    result.weights;
-
-    // Vypis vsech chyb
-    std::cout << "TOTAL ERRORS: ";
-    for (unsigned j = 0; j < total_errors.size(); j++) {
-        std::cout << total_errors[j] << " ";
-    }
-    std::cout << std::endl;
-
-    // Vypis chyby pro nejlepsi sit
-    std::cout
-        << "BEST TOTAL ERROR: "
-        << total_errors[min_total_error_index]
-        << ", NETWORK INDEX: " << min_total_error_index
-        << std::endl;
+    result.network = best_network;
+    result.relative_errors = best_network.relative_errors_vector;
+    result.weights = Get_Weights(best_network);
+    result.neural_ini_str = Generate_Neural_Ini(best_network);
+    result.csv_str = Generate_Csv(best_network);
 
     return result;
 }

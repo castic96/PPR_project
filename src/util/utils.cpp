@@ -28,26 +28,6 @@ size_t kiv_ppr_utils::Band_Level_To_Index(double expected_value) {
 
     int i;
 
-    /*
-    // TODO: mozna predelat
-    double band_size_modified = 
-        (kiv_ppr_constants::High_Threshold - kiv_ppr_constants::Low_Threshold) 
-        / static_cast<double>(kiv_ppr_constants::Internal_Bound_Count - 2);
-
-    double interval_ceiling = kiv_ppr_constants::Low_Threshold;
-
-    for (i = 1; i < kiv_ppr_constants::Internal_Bound_Count - 1; i++) {
-
-        interval_ceiling += band_size_modified;
-
-        if (interval_ceiling > expected_value) {
-            break;
-        }
-
-    }*/
-
-
-    // TODO: mozna predelat
     double interval_ceiling = kiv_ppr_utils::Low_Threshold;
 
     for (i = 1; i <= kiv_ppr_utils::Internal_Bound_Count; i++) {
@@ -96,25 +76,30 @@ double kiv_ppr_utils::Get_Random_Weight() {
     return distribution(generator);
 }
 
-double kiv_ppr_utils::Calculate_Total_Error(std::vector<double> relative_errors_vector) {
+double kiv_ppr_utils::Calc_Average_Relative_Error(std::vector<double> relative_errors_vector) {
     size_t vector_size = relative_errors_vector.size();
-    double average_error = 0.0;
-    double standard_deviation = 0.0;
     double sum = 0.0;
 
     for (unsigned i = 0; i < vector_size; i++) {
         sum += relative_errors_vector[i];
     }
 
-    average_error = sum / (double)vector_size;
+    return (sum / (double)vector_size);
+}
 
-    sum = 0.0;
+double kiv_ppr_utils::Calc_Standard_Deviation(std::vector<double> relative_errors_vector) {
+    size_t vector_size = relative_errors_vector.size();
+    double average_error = kiv_ppr_utils::Calc_Average_Relative_Error(relative_errors_vector);
+    double sum = 0.0;
 
     for (unsigned i = 0; i < vector_size; i++) {
         sum += pow(relative_errors_vector[i] - average_error, 2);
     }
 
-    standard_deviation = sqrt(sum / (double)vector_size);
+    return (sqrt(sum / (double)vector_size));
+}
 
-    return average_error + standard_deviation;
+double kiv_ppr_utils::Calculate_Total_Error(std::vector<double> relative_errors_vector) {
+    return kiv_ppr_utils::Calc_Average_Relative_Error(relative_errors_vector) + 
+            kiv_ppr_utils::Calc_Standard_Deviation(relative_errors_vector);
 }

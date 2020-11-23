@@ -45,11 +45,18 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
         std::vector<double> target_values;
         std::vector<double> expected_values;
 
+        std::string neural_ini_str;
+        std::string csv_str;
+
         kiv_ppr_database_loader::Load_Inputs_Training(input_data, input_values, target_values, expected_values, predicted_minutes);
+
 
         // --- Spusteni na GPU ---
         if (run_gpu) {
             kiv_ppr_gpu::TResults_GPU result_gpu = kiv_ppr_gpu::Run_Training_GPU(input_values, target_values, expected_values);
+            
+            neural_ini_str = result_gpu.neural_ini_str;
+            csv_str = result_gpu.csv_str;
         }
 
         // --- Spusteni na CPU ---
@@ -58,12 +65,19 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
             std::string blue_graph;
 
             kiv_ppr_smp::TResults_CPU result_cpu = kiv_ppr_smp::Run_Training_CPU(input_values, target_values, expected_values);
+
+            neural_ini_str = result_cpu.neural_ini_str;
+            csv_str = result_cpu.csv_str;
+
             kiv_ppr_svg_generator::TSvg_Generator svg_generator = kiv_ppr_svg_generator::New_Generator(result_cpu.network);
             kiv_ppr_svg_generator::Generate(svg_generator, green_graph, blue_graph);
 
             kiv_ppr_file_manager::Save_Svg_File("green_graph.svg", green_graph);
             kiv_ppr_file_manager::Save_Svg_File("blue_graph.svg", blue_graph);
         }
+
+    kiv_ppr_file_manager::Save_Ini_File("neural.ini", neural_ini_str);
+    kiv_ppr_file_manager::Save_Csv_File("errors.csv", csv_str);
 
     }
 
