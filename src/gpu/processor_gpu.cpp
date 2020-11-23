@@ -21,16 +21,16 @@ kiv_ppr_gpu::TResults_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& inp
 
     kiv_ppr_network_gpu::Get_Relative_Errors_Vector(network, expected_values, relative_errors_vector);
 
+    kiv_ppr_network_gpu::Clean(network);
+
 
     double error = kiv_ppr_utils::Calculate_Total_Error(relative_errors_vector);
-
-    //TODO: nekde tady uvolnit buffery
 
     result.network = network;
     result.relative_errors;
     result.weights;
 
-    //std::cout << "Chyba: " << error << std::endl;
+    std::cout << "Chyba: " << error << std::endl;
 
     return result;
 }

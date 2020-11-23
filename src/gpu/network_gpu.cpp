@@ -292,82 +292,97 @@ void kiv_ppr_network_gpu::Get_Relative_Errors_Vector(kiv_ppr_network_gpu::TNetwo
 
 }
 
+void kiv_ppr_network_gpu::Clean(kiv_ppr_network_gpu::TNetworkGPU& network) {
+	delete(network.default_device);
+	delete(network.queue);
+	
+	// Delete CL buffers
+	delete(network.cl_buff_neural_net_data);
+	delete(network.cl_buff_delta_gradient_data);
+	delete(network.cl_buff_input_data);
+	delete(network.cl_buff_target_data);
+	delete(network.cl_buff_helper_data);
+	delete(network.cl_buff_result_indexes);
+	delete(network.cl_buff_training_set_id);
+
+	// Delete kernels
+	delete(network.inc_train_set_id);
+	delete(network.set_data_to_layers);
+	delete(network.feed_forward_input_hidden1);
+	delete(network.feed_forward_hidden1_hidden2);
+	delete(network.feed_forward_hidden2_output);
+	delete(network.set_index_of_result);
+	delete(network.back_prop_output);
+	delete(network.back_prop_hidden2);
+	delete(network.back_prop_hidden1);
+	delete(network.back_prop_input);
+	delete(network.update_weights);
+
+	// Free buffers
+	free(network.neural_net_buff);
+	free(network.delta_gradient_buff);
+	free(network.input_values_buff);
+	free(network.target_values_buff);
+	free(network.helper_buff);
+	free(network.result_indexes_buff);
+	free(network.training_set_id_buff);
+
+}
+
 void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 
 	for (unsigned i = 0; i < network.num_of_training_sets; i++) {
-		//network.training_set_id_buff[0] = i;
-
-		//network.queue->enqueueWriteBuffer(*(network.cl_buff_training_set_id), CL_TRUE, 0, sizeof(cl_int), network.training_set_id_buff);
 
 		// Kernel: inc_train_set_id
-		network.queue->enqueueNDRangeKernel(*(network.inc_train_set_id), cl::NullRange, cl::NDRange(1), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.inc_train_set_id), 
+							cl::NullRange, cl::NDRange(1), cl::NullRange);
 
 		// Kernel: set_data_to_layers
-		network.queue->enqueueNDRangeKernel(*(network.set_data_to_layers), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.set_data_to_layers), 
+							cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: feed_forward_input_hidden1
-		network.queue->enqueueNDRangeKernel(*(network.feed_forward_input_hidden1), cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_input_hidden1), 
+							cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: feed_forward_hidden1_hidden2
-		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden1_hidden2), cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden1_hidden2), 
+							cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: feed_forward_hidden2_output
-		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden2_output), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.feed_forward_hidden2_output), 
+							cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: set_index_of_result
-		network.queue->enqueueNDRangeKernel(*(network.set_index_of_result), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.set_index_of_result), 
+							cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: back_prop_output
-		network.queue->enqueueNDRangeKernel(*(network.back_prop_output), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_output), 
+							cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
 
 		// Kernel: back_prop_hidden2
-		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden2), cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT + 1), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden2), 
+							cl::NullRange, cl::NDRange(HIDDEN2_LAYER_NEURONS_COUNT + 1), cl::NullRange);
 
 		// Kernel: back_prop_hidden1
-		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden1), cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT + 1), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_hidden1), 
+							cl::NullRange, cl::NDRange(HIDDEN1_LAYER_NEURONS_COUNT + 1), cl::NullRange);
 
 		// Kernel: back_prop_input
-		network.queue->enqueueNDRangeKernel(*(network.back_prop_input), cl::NullRange, cl::NDRange(INPUT_LAYER_NEURONS_COUNT + 1), cl::NullRange);
-		//network.queue->finish();
+		network.queue->enqueueNDRangeKernel(*(network.back_prop_input), 
+							cl::NullRange, cl::NDRange(INPUT_LAYER_NEURONS_COUNT + 1), cl::NullRange);
 
 		// Kernel: update_weights
-		network.queue->enqueueNDRangeKernel(*(network.update_weights), cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		network.queue->enqueueNDRangeKernel(*(network.update_weights), 
+							cl::NullRange, cl::NDRange(OUTPUT_LAYER_NEURONS_COUNT), cl::NullRange);
+		
 		network.queue->finish();
 
-		//network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
-		//network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
-
-		/*
-		for (unsigned i = 0; i < CL_BUFF_NEURAL_NET_DATA_SIZE; i++)
-			std::cout << network.neural_net_buff[i] << std::endl;
-		
-		std::cout << "\n\nVysledek: " << network.result_indexes_buff[0] << std::endl;
-		*/
-		
-		/*
-		for (unsigned i = 0; i < (network.num_of_training_sets + 1); i++)
-			std::cout << network.result_indexes_buff[i] << std::endl;
-			*/
-
-
-		//network.queue->enqueueReadBuffer(*(network.cl_buff_neural_net_data), CL_TRUE, 0, sizeof(cl_float) * CL_BUFF_NEURAL_NET_DATA_SIZE, network.neural_net_buff);
-
-		/*
-		for (unsigned i = 0; i < CL_BUFF_NEURAL_NET_DATA_SIZE; i++)
-			std::cout << network.neural_net_buff[i] << std::endl;
-		*/
 	}
 
-	network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
+	network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, 
+							sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
 
 }
 
@@ -424,5 +439,3 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<do
 		
 	return new_network;
 }
-
-//TODO: uvolnit pamet po bufferech

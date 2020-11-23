@@ -99,5 +99,6 @@ namespace kiv_ppr_network_gpu {
 	void Train(TNetworkGPU& network);
 	void Get_Relative_Errors_Vector(TNetworkGPU& network, std::vector<double>& expected_values, std::vector<double>& relative_errors_vector);
 	void Init_Data(TNetworkGPU& network, unsigned input_values_size, unsigned target_values_size);
+	void Clean(TNetworkGPU& network);
 
 }
