@@ -1,5 +1,21 @@
+/**
+*
+* Generator grafu neuronove site do formatu SVG.
+*
+*/
+
 #include "svg_generator.h"
 
+
+/**
+* Vytvori novy SVG generator.
+*
+* params:
+*   network - neuronova sit
+*
+* return:
+*   novy SVG generator
+*/
 kiv_ppr_svg_generator::TSvg_Generator kiv_ppr_svg_generator::New_Generator(kiv_ppr_network::TNetwork& network) {
 	kiv_ppr_svg_generator::TSvg_Generator new_generator;
 
@@ -13,6 +29,17 @@ kiv_ppr_svg_generator::TSvg_Generator kiv_ppr_svg_generator::New_Generator(kiv_p
 	return new_generator;
 }
 
+/**
+* Nastavi hodnotu do SVH objektu misto zastupce.
+*
+* params:
+*   svg_object - SVG objekt
+*   old_value - zastupce
+*   new_value - hodnota
+*
+* return:
+*	true, pokud se hodnota nastavila spravne
+*/
 bool Set_Svg_Value(std::string& svg_object, const std::string& old_value, const std::string& new_value) {
 	size_t start = svg_object.find(old_value);
 
@@ -25,6 +52,12 @@ bool Set_Svg_Value(std::string& svg_object, const std::string& old_value, const 
 	return true;
 }
 
+/**
+* Zjisti maximalni hodnoty counteru a nejvyssi pocet neuronu ve vrstve.
+*
+* params:
+*   generator - SVG generator
+*/
 void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 	std::vector<kiv_ppr_neuron::TLayer> layers = generator.network.layers;
 
@@ -86,6 +119,15 @@ void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 
 }
 
+/**
+* Naskaluje souradnici y pro vrstvu.
+*
+* params:
+*   neurons_count - pocet neuronu ve vrstve
+*   max_neurons - nejvyssi pocet neuronu ve vrstve
+* return:
+*	naskalovana hodnota souradnice y pro vrstvu
+*/
 unsigned Scale_Layers_Y(unsigned neurons_count, unsigned max_neurons) {
 	double norm = neurons_count / (double)max_neurons;
 
@@ -93,6 +135,15 @@ unsigned Scale_Layers_Y(unsigned neurons_count, unsigned max_neurons) {
 	return static_cast<unsigned int>(half_neurons - (half_neurons * norm)) * kiv_ppr_svg_generator::neurons_space_y;
 }
 
+/**
+* Naskaluje souradnici x pro text.
+*
+* params:
+*   neurons_count - pocet neuronu ve vrstve
+*   max_neurons - nejvyssi pocet neuronu ve vrstve
+* return:
+*	naskalovana hodnota souradnice x pro text
+*/
 unsigned Scale_Texts_Y(unsigned neurons_count, unsigned max_neurons) {
 	double norm = neurons_count / (double)max_neurons;
 
@@ -100,6 +151,17 @@ unsigned Scale_Texts_Y(unsigned neurons_count, unsigned max_neurons) {
 	return static_cast<unsigned int>(((half_neurons * norm)) * kiv_ppr_svg_generator::text_font_size);
 }
 
+/**
+* Vygeneruje SVG synapsi dle zadanych souradnic.
+*
+* params:
+*   x1 - souradnice x bodu 1
+*   y1 - souradnice y bodu 1
+*   x2 - souradnice x bodu 2
+*   y2 - souradnice y bodu 2
+* return:
+*	SVG synapse v podobe retezce
+*/
 std::string Generate_Svg_Synapse(unsigned x1, unsigned y1, unsigned x2, unsigned y2) {
 	std::string svg_synapse = kiv_ppr_svg_generator::svg_line;
 
@@ -111,6 +173,15 @@ std::string Generate_Svg_Synapse(unsigned x1, unsigned y1, unsigned x2, unsigned
 	return svg_synapse;
 }
 
+/**
+* Vygeneruje SVG text dle zadanych souradnic.
+*
+* params:
+*   x - souradnice x
+*   y - souradnice y
+* return:
+*	SVG text v podobe retezce
+*/
 std::string  Generate_Svg_Text(unsigned x, unsigned y) {
 	std::string svg_text = kiv_ppr_svg_generator::svg_text;
 
@@ -120,6 +191,15 @@ std::string  Generate_Svg_Text(unsigned x, unsigned y) {
 	return svg_text;
 }
 
+/**
+* Vygeneruje SVG neuron dle zadanych souradnic.
+*
+* params:
+*   x - souradnice x
+*   y - souradnice y
+* return:
+*	SVG neuron v podobe retezce
+*/
 std::string Generate_Svg_Neuron(unsigned x, unsigned y) {
 	std::string svg_neuron = kiv_ppr_svg_generator::svg_ellipse;
 
@@ -129,14 +209,28 @@ std::string Generate_Svg_Neuron(unsigned x, unsigned y) {
 	return svg_neuron;
 }
 
-unsigned Scale_Value(double count, double min_value, double max_value)
-{
-	return (int)((count - min_value) * 
-		(kiv_ppr_svg_generator::graph_max_value - kiv_ppr_svg_generator::graph_min_value) / 
-		(max_value - min_value) + kiv_ppr_svg_generator::graph_min_value);
-	//return static_cast<unsigned int>((count / max_value) * kiv_ppr_svg_generator::color_max_value);
+/**
+* Naskaluje hodnotu do rozmezi 'graph_min_value' - 'graph_max_value'.
+*
+* params:
+*   count - hodnota counteru
+*   min_value - minimalni hodnota counteru
+*   max_value - maximalni hodnota counteru
+* return:
+*	naskalovana hodnota v danem rozmezi
+*/
+unsigned Scale_Value(double count, double min_value, double max_value) {
+	return static_cast<unsigned int>((count - min_value) * 
+				(kiv_ppr_svg_generator::graph_max_value - kiv_ppr_svg_generator::graph_min_value) /
+				(max_value - min_value) + kiv_ppr_svg_generator::graph_min_value);
 }
 
+/**
+* Vygeneruje SVG kostru pro grafy neuronove site.
+*
+* params:
+*   generator - SVG generator
+*/
 void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 	std::vector<kiv_ppr_neuron::TLayer>& layers = generator.network.layers;
 	std::vector<std::vector<std::string>>& svg_synapses = generator.svg_synapses;
@@ -183,11 +277,11 @@ void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 
 				for (unsigned k = 0; k < previous_neurons_count; k++) {
 
-					// Synapse
+					// --- Synapse ---
 					std::string svg_synapse = Generate_Svg_Synapse(x1, y1, x2, y2);
 					current_synapses.push_back(svg_synapse);
 
-					// Text
+					// --- Text ---
 					std::string svg_text = Generate_Svg_Text(x1 + kiv_ppr_svg_generator::ellipse_radius_quarter, 
 															 y_text + (k * kiv_ppr_svg_generator::text_font_size));
 					current_texts.push_back(svg_text);
@@ -213,6 +307,14 @@ void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 
 }
 
+/**
+* Prida do kostry grafu synapse a texty a vygeneruje grafy neuronove site.
+*
+* params:
+*   generator - SVG generator
+*   green_graph - zeleny graf ve formatu SVG
+*   blue_graph - modry graf ve formatu SVG
+*/
 void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::string& green_graph, std::string& blue_graph) {
 	std::cout << "> Generating SVG file with graphs..." << std::endl;
 
@@ -239,7 +341,7 @@ void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::stri
 				unsigned green_value = Scale_Value(counter_green_graph, generator.min_counter_green_graph, generator.max_counter_green_graph);
 				unsigned blue_value = Scale_Value(counter_blue_graph, generator.min_counter_blue_graph, generator.max_counter_blue_graph);
 
-				// Barva synapse
+				// --- Barva synapse ---
 				std::string green_color = "rgb(0, " + std::to_string(green_value) + ", 0)";
 				std::string blue_color = "rgb(0, 0," + std::to_string(blue_value) + ")";
 
@@ -255,7 +357,7 @@ void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::stri
 				green_graph.append(kiv_ppr_svg_generator::line_space);
 				blue_graph.append(kiv_ppr_svg_generator::line_space);
 
-				// Text synapse
+				// --- Text synapse ---
 				std::string green_text = generator.svg_texts[i - 1][k + j * previous_neurons_count];
 				std::string blue_text = generator.svg_texts[i - 1][k + j * previous_neurons_count];
 
@@ -277,6 +379,14 @@ void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::stri
 
 }
 
+/**
+* Vygeneruje SVG grafy neuronove site.
+*
+* params:
+*   generator - SVG generator
+*   green_graph - zeleny graf ve formatu SVG
+*   blue_graph - modry graf ve formatu SVG
+*/
 void kiv_ppr_svg_generator::Generate(kiv_ppr_svg_generator::TSvg_Generator& generator, std::string& green_graph, std::string& blue_graph) {
 	generator.frame.append(kiv_ppr_svg_generator::svg_header);
 	

@@ -1,57 +1,87 @@
+/**
+*
+* Obsahuje mapovaci funkce pro buffery pouzite v kodu pro OpenCL.
+*
+*/
+
 #pragma once
 
+// --- Verze OpenCL ---
 #define		CL_HPP_TARGET_OPENCL_VERSION		200
+
+// --- Velikost bufferu pro ulozeni neuronove site ---
 #define		CL_BUFF_NEURAL_NET_DATA_SIZE		1700
+
+// --- Velikost bufferu pro ulozeni delt a gradientu neuronove site ---
 #define		CL_BUFF_DELTA_GRADIENT_DATA_SIZE	2000
+
+// --- Neuron neprezentujici bias ---
 #define     BIAS								1
+
+// --- Velikost pomocneho bufferu ---
 #define     HELPER_DATA_BUFF_SIZE				10
 
 #include "../constants.h"
 
 namespace kiv_ppr_mapping_gpu {
 
-// ------ Pomocne funkce pro pristup k datum ------------------------------------------------
-// ----- BUFFER: neural_net_data -----
-// --- Vrstvy neuronu ---
-	int input_neuron_i(int i);
-	int hidden1_neuron_i(int i);
-	int hidden2_neuron_i(int i);
-	int output_neuron_i(int i);
+	/**
+	* Mapuje neuron vstupni vrstvy v bufferu neural_net_buff
+	*
+	* params:
+	*   i - index neuronu
+	*/
+	int Input_Neuron_I(int i);
 
-	// --- Vahy mezi neurony (bez biasu) ---
-	int weight_input_hidden1(int input, int hidden1);
-	int weight_hidden1_hidden2(int hidden1, int hidden2);
-	int weight_hidden2_output(int hidden2, int output);
+	/**
+	* Mapuje neuron prvni skryte vrstvy v bufferu neural_net_buff
+	*
+	* params:
+	*   i - index neuronu
+	*/
+	int Hidden1_Neuron_I(int i);
 
-	// ----- BUFFER: helper_data -----
-	// --- Soucet exponencialnich hodnot vsech neuronu vystupni vrstvy (pro SoftMax) ---
-	int exp_sum_output_layer();
+	/**
+	* Mapuje neuron druhe skryte vrstvy v bufferu neural_net_buff
+	*
+	* params:
+	*   i - index neuronu
+	*/
+	int Hidden2_Neuron_I(int i);
 
-	// --- Nejvyssi hodnota z neuronu ve vystupni vrstve ---- 
-	int max_value_output_layer();
+	/**
+	* Mapuje neuron vystupni vrstvy v bufferu neural_net_buff
+	*
+	* params:
+	*   i - index neuronu
+	*/
+	int Output_Neuron_I(int i);
 
-	// ----- BUFFER: input_data -----
-	// --- Pristup k trenovacim datum - vstupy ---
-	int input_value(int set_num, int n);
+	/**
+	* Mapuje vahy neuronu mezi vstupni a prvni skrytou vrstvou.
+	*
+	* params:
+	*   input - index neuronu ve vstupni vrstve
+	*	hidden1 - index neuronu v prvni skryte vrstve
+	*/
+	int Weight_Input_Hidden1(int input, int hidden1);
 
+	/**
+	* Mapuje vahy neuronu mezi prvni skrytou a druhou skrytou vrstvou.
+	*
+	* params:
+	*   hidden1 - index neuronu v prvni skryte vrstve
+	*	hidden2 - index neuronu ve druhe skryte vrstve
+	*/
+	int Weight_Hidden1_Hidden2(int hidden1, int hidden2);
 
-	// ----- BUFFER: target_data -----
-	// --- Pristup k trenovacim datum - ocekavane vstupy ---
-	int target_value(int set_num, int n);
-
-
-	// ----- BUFFER: result_indexes -----
-	// --- Pristup k bufferu pro indexy nejvice aktivovanych neuronu vystupni vrstvy ---
-	int result_value(int set_num);
-
-
-	// ----- BUFFER: delta_gradient_data -----
-	// --- Back propagation ---
-	int delta_input_hidden1(int input, int hidden1);
-	int delta_hidden1_hidden2(int hidden1, int hidden2);
-	int delta_hidden2_output(int hidden2, int output);
-	int	error_gradient_hidden1(int i);
-	int	error_gradient_hidden2(int i);
-	int error_gradient_output(int i);
+	/**
+	* Mapuje vahy neuronu mezi druhou skrytou a vystupni vrstvou.
+	*
+	* params:
+	*   hidden2 - index neuronu ve druhe skryte vrstve
+	*	output - index neuronu ve vystupni vrstve
+	*/
+	int Weight_Hidden2_Output(int hidden2, int output);
 
 }

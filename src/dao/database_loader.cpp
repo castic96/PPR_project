@@ -1,10 +1,30 @@
+/**
+*
+* Nacte data z databaze a nasledne je parsuje.
+*
+*/
+
 #include "database_loader.h"
 
 
+/**
+* Vypocita pocet mist dle poctu minut dopredu pro predikci a delky intervalu
+*
+* params:
+*   prediction_minutes - pocet minut dopredu pro predikci
+*/
 int Compute_Prediction_Places(unsigned prediction_minutes) {
     return (prediction_minutes / MEASURE_INTERVAL_MINUTES);
 }
 
+/**
+* Vypocita pozici noveho indexu, pokud se zmenil segment.
+*
+* params:
+*   input_vector - vstupni data, vektor elementu
+*   first_index - vektor vstupnich hodnot
+*   limit - vektor normalizovanych vstupnich hodnot
+*/
 size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_vector, unsigned first_index, int limit) {
 
     for (unsigned i = first_index; i < first_index + limit - 1; i++) {
@@ -16,6 +36,15 @@ size_t Compute_Changed_Index(std::vector<kiv_ppr_db_connector::TElement> input_v
     return 0;
 }
 
+/**
+* Nacte data z databaze do vektoru elementu.
+*
+* params:
+*   db_name - nazev databaze
+*
+* return:
+*   vektor elementu
+*/
 std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_database_loader::Load_From_Db(char*& db_name) {
     kiv_ppr_db_connector::TData_Reader reader = kiv_ppr_db_connector::New_Reader(db_name);
 
@@ -36,6 +65,18 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_database_loader::Load_From_D
     return input_data;
 }
 
+/**
+* Parsuje data z vektoru elementu.
+*
+* params:
+*   input_data - vstupni data, vektor elementu
+*   input_values - vektor vstupnich hodnot
+*   input_values_risk - vektor normalizovanych vstupnich hodnot
+*   target_values - vektor hodnot 0 a 1, kde 1 je na miste ocekavane hodnoty
+*   expected_values - vektor ocekavanych hodnot
+*   predicted_minutes - pocet predikovanych minut dopredu
+*   input_values_count - pocet trenovacich vzorku
+*/
 void kiv_ppr_database_loader::Load_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
     std::vector<double>& input_values,
     std::vector<double>& input_values_risk,

@@ -1,5 +1,17 @@
+/**
+*
+* Reprezentuje synapsi (pro verzi SMP).
+*
+*/
+
 #include "synapse.h"
 
+/**
+* Vytvori novou synapsi.
+*
+* return:
+*   nova synapse
+*/
 kiv_ppr_synapse::TSynapse kiv_ppr_synapse::New_Synapse() {
 	kiv_ppr_synapse::TSynapse new_synapse;
 	

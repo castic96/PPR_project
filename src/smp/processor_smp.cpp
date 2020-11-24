@@ -1,6 +1,18 @@
+/**
+*
+* Hlavni program pro SMP.
+*
+*/
+
 #include "processor_smp.h"
 
 
+/**
+* Vytvori topologii neuronove site pro trenovani.
+*
+* params:
+*   topology - topologie neuronove site
+*/
 void Create_Topology_Training(std::vector<unsigned>& topology) {
     topology.clear();
 
@@ -10,6 +22,13 @@ void Create_Topology_Training(std::vector<unsigned>& topology) {
     topology.push_back(OUTPUT_LAYER_NEURONS_COUNT);
 }
 
+/**
+* Vytvori topologii neuronove site pro predikci.
+*
+* params:
+*   topology - topologie neuronove site
+*   neural_network_params - parametry neuronove site
+*/
 void Create_Topology_Prediction(std::vector<unsigned>& topology, std::vector<unsigned>& neural_network_params) {
     topology.clear();
     unsigned layers_count = neural_network_params[0];
@@ -20,6 +39,13 @@ void Create_Topology_Prediction(std::vector<unsigned>& topology, std::vector<uns
 
 }
 
+/**
+* Vytvori n neuronovych siti.
+*
+* params:
+*   neural_networks - n neuronovych siti
+*   topology - topologie neuronove site
+*/
 void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_networks, std::vector<unsigned>& topology) {
     std::cout << "> Creating neural networks..." << std::endl;
 
@@ -33,6 +59,15 @@ void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_netwo
     std::cout << "> Count of neural networks: " << neural_networks.size() << std::endl;
 }
 
+/**
+* Vytvari retezec parametru neuronove site (pro generovani INI souboru).
+*
+* params:
+*   network - neuronova sit
+*
+* return:
+*   retezec parametru neuronove site
+*/
 std::string Generate_Neural_Ini_CPU(kiv_ppr_network::TNetwork& network) {
     std::cout << "> Generating INI file with parameters of the best trained neural network..." << std::endl;
 
@@ -90,6 +125,15 @@ std::string Generate_Neural_Ini_CPU(kiv_ppr_network::TNetwork& network) {
     return generated_str;
 }
 
+/**
+* Ziska vahy synapsi neuronove site.
+*
+* params:
+*   network - neuronova sit
+*
+* return:
+*   vahy neuronove site
+*/
 std::vector<std::vector<double>> Get_Weights(kiv_ppr_network::TNetwork& network) {
     std::vector<std::vector<double>> weights;
     std::vector<kiv_ppr_neuron::TLayer> layers = network.layers;
@@ -120,6 +164,15 @@ std::vector<std::vector<double>> Get_Weights(kiv_ppr_network::TNetwork& network)
     return weights;
 }
 
+/**
+* Najde index nejlepe natrenovane neuronove site.
+*
+* params:
+*   neural_networks - neuronove site
+*
+* return:
+*   index neuronove site
+*/
 unsigned Find_Best_Network_Index(std::vector<kiv_ppr_network::TNetwork>& neural_networks) {
     unsigned index = 0;
     std::vector<double> total_errors;
@@ -138,51 +191,13 @@ unsigned Find_Best_Network_Index(std::vector<kiv_ppr_network::TNetwork>& neural_
     return index;
 }
 
-kiv_ppr_smp::TResults_Training_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values_risk, std::vector<double>& target_values, std::vector<double>& expected_values) {
-    kiv_ppr_smp::TResults_Training_CPU result;
-
-    // Vytvoreni topologie
-    std::vector<unsigned> topology;
-    Create_Topology_Training(topology);
-
-    // Vytvoreni n neuronovych siti s danou topologii
-    std::vector<kiv_ppr_network::TNetwork> neural_networks;
-    Create_Neural_Networks(neural_networks, topology);
-
-    unsigned num_of_training_sets = expected_values.size();
-
-    std::cout << "> Training neural networks..." << std::endl;
-
-    for (unsigned i = 0; i < num_of_training_sets; i++) {
-
-        tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t j) {
-
-            // Spusteni feed forward propagation
-            kiv_ppr_network::Feed_Forward_Prop(neural_networks[j], input_values_risk, i, topology[0]);
-
-            // Vypocitani relativni chyby a pridani do vektoru chyb v siti
-            kiv_ppr_network::Save_Relative_Error(neural_networks[j], expected_values[i]);
-
-            // Spusteni back propagation
-            kiv_ppr_network::Back_Prop(neural_networks[j], target_values, i, topology[topology.size() - 1]);
-
-        });
-
-    }
-
-    std::cout << "> Training neural networks... DONE" << std::endl;
-
-    // Nalezeni nejlepe natrenovane site
-    kiv_ppr_network::TNetwork& best_network = neural_networks[Find_Best_Network_Index(neural_networks)];
-
-    result.network = best_network;
-    result.weights = Get_Weights(best_network);
-    result.neural_ini_str = Generate_Neural_Ini_CPU(best_network);
-    result.csv_str = kiv_ppr_utils::Generate_Csv(best_network.relative_errors_vector);
-
-    return result;
-}
-
+/**
+* Nastavi vahy synapsi neuronove site.
+*
+* params:
+*   network - neuronova sit
+*   loaded_weights - nactene vahy synapsi neuronove site
+*/
 void Set_Weights(kiv_ppr_network::TNetwork& network, std::vector<std::vector<double>>& loaded_weights) {
     std::cout << "> Setting loaded weights to neural network..." << std::endl;
 
@@ -211,6 +226,75 @@ void Set_Weights(kiv_ppr_network::TNetwork& network, std::vector<std::vector<dou
 
 }
 
+/**
+* Spousti trenovani neuronove site na SMP.
+*
+* params:
+*   input_values_risk - vektor normalizovanych vstupnich hodnot
+*   target_values - vektor hodnot 0 a 1, kde 1 je na miste ocekavane hodnoty
+*	expected_values - vektor ocekavanych hodnot
+*
+* return:
+*   vysledky trenovani neuronove site
+*/
+kiv_ppr_smp::TResults_Training_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<double>& input_values_risk, std::vector<double>& target_values, std::vector<double>& expected_values) {
+    kiv_ppr_smp::TResults_Training_CPU result;
+
+    // --- Vytvoreni topologie ---
+    std::vector<unsigned> topology;
+    Create_Topology_Training(topology);
+
+    // --- Vytvoreni n neuronovych siti s danou topologii ---
+    std::vector<kiv_ppr_network::TNetwork> neural_networks;
+    Create_Neural_Networks(neural_networks, topology);
+
+    unsigned num_of_training_sets = expected_values.size();
+
+    std::cout << "> Training neural networks..." << std::endl;
+
+    for (unsigned i = 0; i < num_of_training_sets; i++) {
+
+        tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t j) {
+
+            // --- Spusteni feed forward propagation ---
+            kiv_ppr_network::Feed_Forward_Prop(neural_networks[j], input_values_risk, i, topology[0]);
+
+            // --- Vypocitani relativni chyby a pridani do vektoru chyb v siti ---
+            kiv_ppr_network::Save_Relative_Error(neural_networks[j], expected_values[i]);
+
+            // --- Spusteni back propagation ---
+            kiv_ppr_network::Back_Prop(neural_networks[j], target_values, i, topology[topology.size() - 1]);
+
+            });
+
+    }
+
+    std::cout << "> Training neural networks... DONE" << std::endl;
+
+    // --- Nalezeni nejlepe natrenovane site ---
+    kiv_ppr_network::TNetwork& best_network = neural_networks[Find_Best_Network_Index(neural_networks)];
+
+    result.network = best_network;
+    result.weights = Get_Weights(best_network);
+    result.neural_ini_str = Generate_Neural_Ini_CPU(best_network);
+    result.csv_str = kiv_ppr_utils::Generate_Csv(best_network.relative_errors_vector);
+
+    return result;
+}
+
+/**
+* Spousti predikci na SMP.
+*
+* params:
+*   input_values - vektor vstupnich hodnot
+*   input_values_risk - vektor normalizovanych vstupnich hodnot
+*	expected_values - vektor ocekavanych hodnot
+*	loaded_weights - nactene vahy synapsi pro neuronovou sit
+*	neural_network_params - topologie neuronove site (pocet vrstev a neuronu v kazde vrstve)
+*
+* return:
+*   vysledky predikce
+*/
 kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector<double>& input_values,
                                         std::vector<double>& input_values_risk,
                                         std::vector<double>& expected_values,
@@ -220,11 +304,11 @@ kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector
     kiv_ppr_smp::TResults_Prediction_CPU result;
     std::vector<double> result_values;
 
-    // Vytvoreni topologie
+    // --- Vytvoreni topologie ---
     std::vector<unsigned> topology;
     Create_Topology_Prediction(topology, neural_network_params);
 
-    // Vytvoreni neuronove site s danou topologii
+    // --- Vytvoreni neuronove site s danou topologii ---
     std::cout << "> Creating neural network..." << std::endl;
     kiv_ppr_network::TNetwork neural_network = kiv_ppr_network::New_Network(topology);
     std::cout << "> Creating neural network... DONE" << std::endl;
@@ -237,13 +321,13 @@ kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector
 
     for (unsigned i = 0; i < num_of_training_sets; i++) {
 
-        // Spusteni feed forward propagation
+        // --- Spusteni feed forward propagation ---
         kiv_ppr_network::Feed_Forward_Prop(neural_network, input_values_risk, i, topology[0]);
 
-        // Vypocitani relativni chyby a pridani do vektoru chyb v siti
+        // --- Vypocitani relativni chyby a pridani do vektoru chyb v siti ---
         kiv_ppr_network::Save_Relative_Error(neural_network, expected_values[i]);
 
-        // Ziskani vysledku predikce
+        // --- Ziskani vysledku predikce ---
         kiv_ppr_network::Add_Result_Value(neural_network, result_values);
 
     }

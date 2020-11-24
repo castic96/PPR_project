@@ -1,5 +1,20 @@
+/**
+*
+* Nacita data ze souboru a uklada data do souboru.
+*
+*/
+
 #include "file_manager.h"
 
+
+/**
+* Uklada predany soubor.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   to_write - data k ulozeni
+*   suffix - pripona souboru
+*/
 void Save_File(std::string& file_path, std::string& to_write, std::string suffix) {
 	size_t index = file_path.rfind(suffix);
 
@@ -14,6 +29,13 @@ void Save_File(std::string& file_path, std::string& to_write, std::string suffix
 	out.close();
 }
 
+/**
+* Uklada SVG soubor s grafem.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   graph - data k ulozeni
+*/
 void kiv_ppr_file_manager::Save_Svg_File(std::string file_path, std::string& graph) {
 	std::cout << "> Saving SVG file..." << std::endl;
 
@@ -24,6 +46,13 @@ void kiv_ppr_file_manager::Save_Svg_File(std::string file_path, std::string& gra
 	std::cout << "> SVG file saved to: " << file_path << std::endl;
 }
 
+/**
+* Uklada INI soubor s parametry neuronove site.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   neural_params - data k ulozeni
+*/
 void kiv_ppr_file_manager::Save_Ini_File(std::string file_path, std::string& neural_params) {
 	std::cout << "> Saving INI file..." << std::endl;
 
@@ -34,6 +63,13 @@ void kiv_ppr_file_manager::Save_Ini_File(std::string file_path, std::string& neu
 	std::cout << "> INI file saved to: " << file_path << std::endl;
 }
 
+/**
+* Uklada CSV soubor s relativnimi chybami.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   errors - data k ulozeni
+*/
 void kiv_ppr_file_manager::Save_Csv_File(std::string file_path, std::string& errors) {
 	std::cout << "> Saving CSV file..." << std::endl;
 
@@ -44,6 +80,13 @@ void kiv_ppr_file_manager::Save_Csv_File(std::string file_path, std::string& err
 	std::cout << "> CSV file saved to: " << file_path << std::endl;
 }
 
+/**
+* Uklada TXT soubor s vysledky predikce.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   results - data k ulozeni
+*/
 void kiv_ppr_file_manager::Save_Results_File(std::string file_path, std::string& results) {
 	std::cout << "> Saving TXT results file..." << std::endl;
 
@@ -54,6 +97,14 @@ void kiv_ppr_file_manager::Save_Results_File(std::string file_path, std::string&
 	std::cout << "> TXT results file saved to: " << file_path << std::endl;
 }
 
+/**
+* Nacita prenady soubor.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   input_file - cesta ke vstupnimu souboru
+*	suffix - pripona souboru
+*/
 bool Load_File(std::string file_path, std::ifstream& input_file, std::string suffix) {
 	size_t index = file_path.rfind(suffix);
 
@@ -73,6 +124,14 @@ bool Load_File(std::string file_path, std::ifstream& input_file, std::string suf
 
 }
 
+/**
+* Nacita INI soubor s vahami neuronove site.
+*
+* params:
+*   file_path - cesta k vystupnimu souboru
+*   loaded_weights - cesta ke vstupnimu souboru
+*	neural_network_params - vahy neuronove site
+*/
 bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std::vector<double>>& loaded_weights, std::vector<unsigned>& neural_network_params) {
 	std::cout << "> Loading INI file '" << file_path << "' with parameters of neural network..." << std::endl;
 	
@@ -92,7 +151,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 	unsigned neuron_index = 0;
 	unsigned weight_index = 0;
 
-	// Overeni, zda soubor zacina skrytou vrstvou
+	// --- Overeni, zda soubor zacina skrytou vrstvou ---
 	std::getline(input_ini_file, line);
 
 	std::transform(line.begin(), line.end(), line.begin(),
@@ -180,7 +239,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 		return false;
 	}
 
-	// Pridam posledni vrstvu do vektoru
+	// --- Pridani posledni vrstvy do vektoru ---
 	loaded_weights.push_back(current_layer_weights);
 	neural_network_params[0]++;
 	neural_network_params.push_back(weight_index + 1);

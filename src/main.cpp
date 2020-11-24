@@ -1,3 +1,9 @@
+/**
+*
+* Hlavni soubor programu obsahujici spousteci bod.
+*
+*/
+
 #include    <stdio.h>
 #include    <stdlib.h>
 #include    <iostream>
@@ -9,13 +15,10 @@
 #include    "dao/file_manager.h"
 #include    "constants.h"
 
-#define     CSV_PATH                "../out/errors.csv"
-#define     NEURAL_INI_PATH         "../out/neural.ini"
-#define     RESULTS_PATH            "../out/results.txt"
-#define     GREEN_GRAPH_PATH        "../out/green_graph.svg"
-#define     BLUE_GRAPH_PATH         "../out/blue_graph.svg"
 
-
+/**
+* Vypise do konzole informace o programu.
+*/
 void Print_Info() {
     std::cout << "------------------------------------------------------------------------------------------" << std::endl;
     std::cout << "------------------------------------------------------------------------------------------" << std::endl;
@@ -28,6 +31,9 @@ void Print_Info() {
     std::cout << std::endl;
 }
 
+/**
+* Vypise do konzole napovedu ke spusteni programu.
+*/
 void Print_Help() {
     std::cout << "------------------------------------------------------------------------------------------" << std::endl;
     std::cout << "  USAGE:" << std::endl;
@@ -44,6 +50,15 @@ void Print_Help() {
     std::cout << std::endl;
 }
 
+/**
+* Vypise do konzole informace o aktualni konfiguraci programu.
+*
+* params:
+*   db_name - nazev databaze k nacteni dat
+*   predicted_minutes - pocet minut dopredu, na ktery se bude predikovat nebo trenovat
+*   weights_file_name - soubor s vahami neuronove site
+*   run_gpu - logicka hodnota, zda ma program trenovat na GPU
+*/
 void Print_Conf(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, bool run_gpu) {
     std::cout << "------------------------------------------------------------------------------------------" << std::endl;
     std::cout << "  RUN CONFIGURATION:" << std::endl;
@@ -58,6 +73,17 @@ void Print_Conf(char*& db_name, unsigned& predicted_minutes, char*& weights_file
     std::cout << std::endl;
 }
 
+/**
+* Parsuje argumenty prikazove radky.
+*
+* params:
+*   argc - pocet argumentu prikazove radky
+*   argv - argumenty prikazove radky
+*   predicted_minutes - pocet minut dopredu, na ktery se bude predikovat nebo trenovat
+*   db_name - nazev databaze k nacteni dat
+*   run_gpu - logicka hodnota, zda ma program trenovat na GPU
+*   weights_file_name - soubor s vahami neuronove site
+*/
 void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, bool& run_gpu, char*& weights_file_name) {
 
     if (argc <= 1) {
@@ -107,6 +133,16 @@ void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_
 
 }
 
+/**
+* Beh programu. Zakladni vetveni, zda se pouzije CPU/GPU a zda se bude
+* predikovat nebo trenovat.
+*
+* params:
+*   db_name - nazev databaze k nacteni dat
+*   predicted_minutes - pocet minut dopredu, na ktery se bude predikovat nebo trenovat
+*   weights_file_name - soubor s vahami neuronove site
+*   run_gpu - logicka hodnota, zda ma program trenovat na GPU
+*/
 void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, bool run_gpu) {
     
     // --- Promenne pro vstupy ---
@@ -190,6 +226,16 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
     }
 }
 
+/**
+* Spousteci bod programu.
+*
+* params:
+*   argc - pocet argumentu prikazove radky
+*   argv - argumenty prikazove radky
+*
+* return:
+*   navratovy kod programu   
+*/
 int main(int argc, char** argv) {
 
     unsigned predicted_minutes;

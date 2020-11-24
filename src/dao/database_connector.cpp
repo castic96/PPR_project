@@ -1,3 +1,9 @@
+/**
+*
+* Konektor do databaze.
+*
+*/
+
 #include <stdio.h>
 #include <string>
 #include <iostream>
@@ -6,6 +12,15 @@
 #include "database_connector.h"
 
 
+/**
+* Vytvori novy reader pro cteni dat z databaze.
+*
+* params:
+*   db_name - nazev databaze
+*
+* return:
+*   novy reader pro cteni dat z databaze
+*/
 kiv_ppr_db_connector::TData_Reader kiv_ppr_db_connector::New_Reader(char* db_name) {
 
     kiv_ppr_db_connector::TData_Reader new_reader;
@@ -15,6 +30,15 @@ kiv_ppr_db_connector::TData_Reader kiv_ppr_db_connector::New_Reader(char* db_nam
 	return new_reader;
 }
 
+/**
+* Otevre databazi.
+*
+* params:
+*   reader - handler na databazi
+*
+* return:
+*   true - pokud je otevreni uspesne
+*/
 bool kiv_ppr_db_connector::Open_Database(kiv_ppr_db_connector::TData_Reader &reader) {
     std::cout << "> Opening database '" << reader.db_name << "'..." << std::endl;
 
@@ -31,6 +55,15 @@ bool kiv_ppr_db_connector::Open_Database(kiv_ppr_db_connector::TData_Reader &rea
 
 }
 
+/**
+* Zavre databazi.
+*
+* params:
+*   reader - handler na databazi
+*
+* return:
+*   true - pokud je zavreni uspesne
+*/
 bool kiv_ppr_db_connector::Close_Database(kiv_ppr_db_connector::TData_Reader& reader) {
     std::cout << "> Closing database..." << std::endl;
 
@@ -47,6 +80,16 @@ bool kiv_ppr_db_connector::Close_Database(kiv_ppr_db_connector::TData_Reader& re
 
 }
 
+/**
+* Vytvori novy element pro data nactena z databaze.
+*
+* params:
+*   ist - hodnota glygemie
+*   segment_id - identifikator segmentu
+*
+* return:
+*   novy element
+*/
 kiv_ppr_db_connector::TElement New_Element(double ist, unsigned segment_id) {
     kiv_ppr_db_connector::TElement new_element;
 
@@ -56,6 +99,15 @@ kiv_ppr_db_connector::TElement New_Element(double ist, unsigned segment_id) {
     return new_element;
 }
 
+/**
+* Nacte data z databaze.
+*
+* params:
+*   reader - handler na databazi
+*
+* return:
+*   vektor dat nactenych z databaze
+*/
 std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_db_connector::Load_Data(kiv_ppr_db_connector::TData_Reader& reader) {
     std::cout << "> Loading data from database..." << std::endl;
 

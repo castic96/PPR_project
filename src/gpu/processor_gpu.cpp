@@ -1,5 +1,22 @@
+/**
+*
+* Hlavni program pro GPU.
+*
+*/
+
 #include "processor_gpu.h"
 
+
+/**
+* Vytvari retezce popisu neuronu a jejich vah (pro generovani INI souboru).
+*
+* params:
+*   i - index neuronu
+*   j - index jeho vahy
+*
+* return:
+*   retezec popisu neuronu a jeho vah
+*/
 std::string Generate_Label_Neurons(unsigned i, unsigned j) {
     std::string generated_str;
 
@@ -11,6 +28,15 @@ std::string Generate_Label_Neurons(unsigned i, unsigned j) {
     return generated_str;
 }
 
+/**
+* Vytvari retezce popisu neuronu a jejich biasu (pro generovani INI souboru).
+*
+* params:
+*   i - index neuronu
+*
+* return:
+*   retezec popisu neuronu a jeho biasu
+*/
 std::string Generate_Label_Bias(unsigned i) {
     std::string generated_str;
 
@@ -22,6 +48,15 @@ std::string Generate_Label_Bias(unsigned i) {
     return generated_str;
 }
 
+/**
+* Vytvari retezec parametru neuronove site (pro generovani INI souboru).
+*
+* params:
+*   network - neuronova sit
+*
+* return:
+*   retezec parametru neuronove site
+*/
 std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
     std::cout << "> Generating INI file with parameters of neural network..." << std::endl;
 
@@ -40,7 +75,7 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
             }
 
             generated_str.append(std::to_string(
-                network.neural_net_buff[kiv_ppr_mapping_gpu::weight_input_hidden1(j, i)]));
+                network.neural_net_buff[kiv_ppr_mapping_gpu::Weight_Input_Hidden1(j, i)]));
 
             generated_str.append("\n");
 
@@ -61,7 +96,7 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
             }
 
             generated_str.append(std::to_string(
-                network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden1_hidden2(j, i)]));
+                network.neural_net_buff[kiv_ppr_mapping_gpu::Weight_Hidden1_Hidden2(j, i)]));
 
             generated_str.append("\n");
 
@@ -82,7 +117,7 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
             }
 
             generated_str.append(std::to_string(
-                network.neural_net_buff[kiv_ppr_mapping_gpu::weight_hidden2_output(j, i)]));
+                network.neural_net_buff[kiv_ppr_mapping_gpu::Weight_Hidden2_Output(j, i)]));
 
             generated_str.append("\n");
 
@@ -94,6 +129,17 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
     return generated_str;
 }
 
+/**
+* Spousti trenovani neuronove site na GPU.
+*
+* params:
+*   input_values - vektor normalizovanych vstupnich hodnot
+*   target_values - vektor hodnot 0 a 1, kde 1 je na miste ocekavane hodnoty
+*	expected_values - vektor ocekavanych hodnot
+*
+* return:
+*   vysledky trenovani neuronove site
+*/
 kiv_ppr_gpu::TResults_Training_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
 
     kiv_ppr_gpu::TResults_Training_GPU result;
