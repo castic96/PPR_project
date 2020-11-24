@@ -30,7 +30,7 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_database_loader::Load_From_D
     return input_data;
 }
 
-void kiv_ppr_database_loader::Load_Inputs_Training(std::vector<kiv_ppr_db_connector::TElement>& input_data,
+void kiv_ppr_database_loader::Load_Inputs(std::vector<kiv_ppr_db_connector::TElement>& input_data,
     std::vector<double>& input_values,
     std::vector<double>& input_values_risk,
     std::vector<double>& target_values,

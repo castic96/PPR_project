@@ -42,7 +42,7 @@ bool Load_File(std::string file_path, std::ifstream& input_file, std::string suf
 	size_t index = file_path.rfind(suffix);
 
 	if (index != file_path.length() - 4) {
-		std::cout << "Specified file '" << file_path << "' does not have required format." << std::endl;
+		std::cout << "Specified file '" << file_path << "' does not have required type." << std::endl;
 		return false;
 	}
 

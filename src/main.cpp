@@ -16,15 +16,59 @@
 #define     BLUE_GRAPH_PATH         "../out/blue_graph.svg"
 
 
-void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, char*& weights_file_name) {
+void Print_Info() {
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "-----------------------  BLOOD GLUCOSE LEVEL PREDICTION CHALLENGE 1.0 --------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "--  KIV/PPR - Semestral project  ---------------------------------------------------------" << std::endl;
+    std::cout << "--  2020/2021  ---------------------------------------------------------------------------" << std::endl;
+    std::cout << "--  Zdenek Castoral, A19N0026P------------------------------------------------------------" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::endl;
+}
+
+void Print_Help() {
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "  USAGE:" << std::endl;
+    std::cout << "    Program arguments:" << std::endl << std::endl;
+    std::cout << "\t\t<prediction_minutes> <database> [device] [neural_params]" << std::endl << std::endl;
+    std::cout << "\t- prediction_minutes: minutes to predict - must be unsigned int divisible by 5" << std::endl;
+    std::cout << "\t- database: name of the database to load training set" << std::endl;
+    std::cout << "\t- device (optional): CPU/GPU - 0=CPU (default), 1=GPU" << std::endl;
+    std::cout << "\t- neural_params (optional): file with the weights of the neural network" << std::endl;
+    std::cout << std::endl;
+    std::cout << "    If the 'neural_params' file is entered, the type of device cannot be entered - CPU\n    will be used." << std::endl;
+
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::endl;
+}
+
+void Print_Conf(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, bool run_gpu) {
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "  RUN CONFIGURATION:" << std::endl;
+    std::cout << "\tGeneral:" << std::endl;
+    std::cout << "\t\tScale:\t\t\trisk function" << std::endl;
+    std::cout << "\t\tClassification:\t\tmulticlass" << std::endl;
+    std::cout << "\tChosen:" << std::endl;
+    std::cout << "\t\tOperation:\t\t" << ((weights_file_name == NULL) ? "training" : "prediction") << std::endl;
+    std::cout << "\t\tDevice:\t\t\t" << ((run_gpu) ? "GPU" : "CPU") << std::endl;
+    std::cout << "\t\tMinutes:\t\t" << predicted_minutes << std::endl;
+    std::cout << "------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << std::endl;
+}
+
+void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_name, bool& run_gpu, char*& weights_file_name) {
 
     if (argc <= 1) {
-        std::cout << "Required arguments have not been entered." << std::endl;
+        std::cout << "> Required arguments have not been entered." << std::endl;
+        Print_Help();
         exit(EXIT_FAILURE);
     }
 
     if ((argc < 3) || (argc > 4)) {
-        std::cout << "Wrong number of arguments have been entered." << std::endl;
+        std::cout << "> Wrong number of arguments have been entered." << std::endl;
+        Print_Help();
         exit(EXIT_FAILURE);
     }
 
@@ -32,12 +76,34 @@ void Prepare_Args(int argc, char** argv, unsigned& predicted_minutes, char*& db_
         predicted_minutes = std::stoi(argv[1]);
     }
     catch (...) {
-        std::cout << "Wrong type of first argument. Unsigned integer number is required." << std::endl;
+        std::cout << "> Wrong type of first argument. Unsigned integer number is required." << std::endl;
+        Print_Help();
+        exit(EXIT_FAILURE);
+    }
+
+    if (predicted_minutes <= 0 || predicted_minutes % 5 != 0) {
+        std::cout << "> Wrong type of first argument. Integer must by unsigned and divisible by 5." << std::endl;
+        Print_Help();
         exit(EXIT_FAILURE);
     }
 
     db_name = argv[2];
-    weights_file_name = argv[3];
+    run_gpu = false;
+    weights_file_name = NULL;
+    
+    if (argc == 4) {
+
+        if (strlen(argv[3]) == 1 && (*argv[3] == '1' || *argv[3] == '0')) {
+            
+            if (*argv[3] == '1') {
+                run_gpu = true;
+            }
+
+        }
+        else {
+            weights_file_name = argv[3];
+        }
+    }
 
 }
 
@@ -61,7 +127,7 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
 
     // --- Trenovani site ---
     if (weights_file_name == NULL) {
-        kiv_ppr_database_loader::Load_Inputs_Training(input_data, input_values, 
+        kiv_ppr_database_loader::Load_Inputs(input_data, input_values,
                                         input_values_risk, target_values, 
                                         expected_values, predicted_minutes, 
                                         INPUT_LAYER_NEURONS_COUNT);
@@ -89,8 +155,8 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
             kiv_ppr_file_manager::Save_Svg_File(BLUE_GRAPH_PATH, blue_graph);
         }
 
-    kiv_ppr_file_manager::Save_Ini_File(NEURAL_INI_PATH, neural_ini_str);
-    kiv_ppr_file_manager::Save_Csv_File(CSV_PATH, csv_str);
+        kiv_ppr_file_manager::Save_Ini_File(NEURAL_INI_PATH, neural_ini_str);
+        kiv_ppr_file_manager::Save_Csv_File(CSV_PATH, csv_str);
 
     }
 
@@ -98,47 +164,44 @@ void Run(char*& db_name, unsigned& predicted_minutes, char*& weights_file_name, 
     else {
         std::vector<std::vector<double>> loaded_weights;
         std::vector<unsigned> neural_network_params;
-        kiv_ppr_file_manager::Load_Ini_File(weights_file_name, loaded_weights, neural_network_params);
 
-        kiv_ppr_database_loader::Load_Inputs_Training(input_data, input_values,
+        if (!kiv_ppr_file_manager::Load_Ini_File(weights_file_name, loaded_weights, neural_network_params)) {
+            exit(EXIT_FAILURE);
+        }
+
+        kiv_ppr_database_loader::Load_Inputs(input_data, input_values,
             input_values_risk, target_values,
             expected_values, predicted_minutes,
             neural_network_params[1]);
 
-        // --- Spusteni na GPU ---
-        if (run_gpu) {
-        }
+        kiv_ppr_smp::TResults_Prediction_CPU result_prediction_cpu = kiv_ppr_smp::Run_Prediction_CPU(
+            input_values, input_values_risk, expected_values, loaded_weights, neural_network_params);
 
-        // --- Spusteni na CPU ---
-        else {
-            kiv_ppr_smp::TResults_Prediction_CPU result_prediction_cpu = kiv_ppr_smp::Run_Prediction_CPU(
-                input_values, input_values_risk, expected_values, loaded_weights, neural_network_params);
+        csv_str = result_prediction_cpu.csv_str;
+        results_str = result_prediction_cpu.results;
 
-            csv_str = result_prediction_cpu.csv_str;
-            results_str = result_prediction_cpu.results;
+        kiv_ppr_svg_generator::TSvg_Generator svg_generator = kiv_ppr_svg_generator::New_Generator(result_prediction_cpu.network);
+        kiv_ppr_svg_generator::Generate(svg_generator, green_graph, blue_graph);
 
-            kiv_ppr_svg_generator::TSvg_Generator svg_generator = kiv_ppr_svg_generator::New_Generator(result_prediction_cpu.network);
-            kiv_ppr_svg_generator::Generate(svg_generator, green_graph, blue_graph);
-
-            kiv_ppr_file_manager::Save_Svg_File(GREEN_GRAPH_PATH, green_graph);
-            kiv_ppr_file_manager::Save_Svg_File(BLUE_GRAPH_PATH, blue_graph);
-        }
-
+        kiv_ppr_file_manager::Save_Svg_File(GREEN_GRAPH_PATH, green_graph);
+        kiv_ppr_file_manager::Save_Svg_File(BLUE_GRAPH_PATH, blue_graph);
         kiv_ppr_file_manager::Save_Csv_File(CSV_PATH, csv_str);
         kiv_ppr_file_manager::Save_Results_File(RESULTS_PATH, results_str);
-
     }
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 
     unsigned predicted_minutes;
     char* db_name;
     char* weights_file_name;
-    bool run_gpu = false;
+    bool run_gpu;
 
-    Prepare_Args(argc, argv, predicted_minutes, db_name, weights_file_name);
+    Print_Info();
+
+    Prepare_Args(argc, argv, predicted_minutes, db_name, run_gpu, weights_file_name);
+
+    Print_Conf(db_name, predicted_minutes, weights_file_name, run_gpu);
 
     Run(db_name, predicted_minutes, weights_file_name, run_gpu);
 
