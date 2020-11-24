@@ -46,20 +46,22 @@ void Print_Device_Info(cl::Device device, unsigned i) {
 	std::cout << "\n\t Double Precision:\t";
 	if (found != std::string::npos) { std::cout << "yes\n"; }
 	else { std::cout << "no\n"; }
-
-	std::cout << "\n----------------------------------------------\n";
 }
 
 void Print_Platform_Info(cl::Platform platform, unsigned i) {
-	std::cout << "Platform: " << i + 1 << ": "
+	std::cout << "PLATFORM: " << i + 1 << ": "
 		<< platform.getInfo<CL_PLATFORM_NAME>()
-		<< "\n----------------------------------------------"
+		<< "\n------------------------------------------------------------------------------------------"
 		<< "\nVendor:\t\t" << platform.getInfo<CL_PLATFORM_VENDOR>()
 		<< "\nVersion:\t" << platform.getInfo<CL_PLATFORM_VERSION>();
-	std::cout << "\n----------------------------------------------\n";
+	std::cout << "\n------------------------------------------------------------------------------------------\n";
 }
 
 bool Find_Devices(std::vector<cl::Device>& devices_gpu, std::vector<cl::Device>& devices_cpu) {
+	std::cout << "> Finding devices compatible with OpenCL..." << std::endl;
+	std::cout << "\n------------------------------------------------------------------------------------------\n";
+	std::cout << "Available devices:" << std::endl;
+
 	std::vector<cl::Platform> available_platforms;
 	std::vector<cl::Device> available_devices_gpu;
 	std::vector<cl::Device> available_devices_cpu;
@@ -96,15 +98,20 @@ bool Find_Devices(std::vector<cl::Device>& devices_gpu, std::vector<cl::Device>&
 		counter = 0;
 	}
 
+	std::cout << "\n------------------------------------------------------------------------------------------\n\n";
+
 	if (available_platforms.size() == 0 || (devices_gpu.size() == 0 && devices_cpu.size() == 0)) {
-		std::cout << "Error: There are no OpenCL devices available!" << std::endl;
+		std::cout << "> Error. There are no OpenCL devices available." << std::endl;
 		return false;
 	}
+
+	std::cout << "> Finding devices compatible with OpenCL... DONE" << std::endl;
 
 	return true;
 }
 
 bool Choose_Device(cl::Device*& choosen_device, std::vector<cl::Device>& devices_gpu, std::vector<cl::Device>& devices_cpu, bool prefer_gpu) {
+	std::cout << "> Choosing device..." << std::endl;
 
 	if (prefer_gpu) {
 		if (devices_gpu.size() > 0) {
@@ -137,6 +144,8 @@ void Load_Code(std::string file, std::string& cl_code) {
 }
 
 bool Build_Cl_Program(cl::Device*& device, cl::Context& context, cl::Program& program, std::string& cl_code) {
+	std::cout << "> Building OpenCL code..." << std::endl;
+
 	cl::Program::Sources sources;
 
 	sources.push_back({ cl_code.c_str(), cl_code.length() });
@@ -146,12 +155,12 @@ bool Build_Cl_Program(cl::Device*& device, cl::Context& context, cl::Program& pr
 
 	if (program.build({ *device }) != CL_SUCCESS)
 	{
-		std::cout << "Build error: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(*device) << "\n";
+		std::cout << "> Build error: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(*device) << "\n";
 		return false;
 	}
 	else
 	{
-		std::cout << "Build OK.\n";
+		std::cout << "> Building OpenCL code... DONE" << std::endl;
 		return true;
 	}
 }
@@ -330,6 +339,7 @@ void kiv_ppr_network_gpu::Clean(kiv_ppr_network_gpu::TNetworkGPU& network) {
 }
 
 void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
+	std::cout << "> Training neural network..." << std::endl;
 
 	for (unsigned i = 0; i < network.num_of_training_sets; i++) {
 
@@ -384,6 +394,7 @@ void kiv_ppr_network_gpu::Train(kiv_ppr_network_gpu::TNetworkGPU& network) {
 	network.queue->enqueueReadBuffer(*(network.cl_buff_result_indexes), CL_TRUE, 0, 
 							sizeof(cl_int) * (network.num_of_training_sets + 1), network.result_indexes_buff);
 
+	std::cout << "> Training neural network... DONE" << std::endl;
 }
 
 void kiv_ppr_network_gpu::Init_Data(kiv_ppr_network_gpu::TNetworkGPU& network, unsigned input_values_size, unsigned target_values_size) {
@@ -395,6 +406,7 @@ void kiv_ppr_network_gpu::Init_Data(kiv_ppr_network_gpu::TNetworkGPU& network, u
 }
 
 kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<double>& input_values, std::vector<double>& target_values, unsigned num_of_training_sets) {
+
     kiv_ppr_network_gpu::TNetworkGPU new_network;
 	std::vector<cl::Device> devices_gpu;
 	std::vector<cl::Device> devices_cpu;
@@ -416,8 +428,9 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<do
 
 	Choose_Device(new_network.default_device, devices_gpu, devices_cpu, prefer_gpu);
 
+	std::cout << "\n------------------------------------------------------------------------------------------\n";
 	std::cout << "\nChosen device: " << new_network.default_device->getInfo<CL_DEVICE_NAME>() << std::endl;
-	std::cout << "\n----------------------------------------------\n\n";
+	std::cout << "\n------------------------------------------------------------------------------------------\n\n";
 
 	Load_Code(CL_FILE_DEST, cl_code);
 
@@ -425,6 +438,8 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<do
 		new_network.is_valid = false;
 		return new_network;
 	}
+
+	std::cout << "> Creating neural network..." << std::endl;
 
 	Allocate_Buffers(new_network, context, input_values_size, target_values_size);
 
@@ -436,6 +451,8 @@ kiv_ppr_network_gpu::TNetworkGPU kiv_ppr_network_gpu::New_Network(std::vector<do
 	new_network.queue = new cl::CommandQueue(context, *(new_network.default_device));
 
 	new_network.is_valid = true;
+
+	std::cout << "> Creating neural network...DONE" << std::endl;
 		
 	return new_network;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include	<vector>
+#include    <iostream>
 #include	"../constants.h"
 #include	"../dao/database_connector.h"
 #include	"../util/utils.h"

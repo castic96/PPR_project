@@ -25,7 +25,13 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_database_loader::Load_From_D
 
     std::vector<kiv_ppr_db_connector::TElement> input_data = kiv_ppr_db_connector::Load_Data(reader);
 
-    kiv_ppr_db_connector::Close_Database(reader);
+    if (input_data.empty()) {
+        exit(EXIT_FAILURE);
+    }
+
+    if (!kiv_ppr_db_connector::Close_Database(reader)) {
+        exit(EXIT_FAILURE);
+    }    
 
     return input_data;
 }
@@ -37,6 +43,8 @@ void kiv_ppr_database_loader::Load_Inputs(std::vector<kiv_ppr_db_connector::TEle
     std::vector<double>& expected_values,
     unsigned predicted_minutes, 
     unsigned input_layer_neurons_count) {
+
+    std::cout << "> Parsing inputs from database..." << std::endl;
 
     std::vector<double> current_target_values;
     unsigned index = 0;
@@ -51,6 +59,7 @@ void kiv_ppr_database_loader::Load_Inputs(std::vector<kiv_ppr_db_connector::TEle
             run_again = false;
 
             if (index + limit > input_data.size()) {
+                std::cout << "> Parsing inputs from database... DONE" << std::endl;
                 return;
             }
 

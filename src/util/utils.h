@@ -2,6 +2,7 @@
 
 #include    <vector>
 #include    <string>
+#include    <iostream>
 #include    "../constants.h"
 
 namespace kiv_ppr_utils {

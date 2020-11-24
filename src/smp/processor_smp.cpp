@@ -21,15 +21,21 @@ void Create_Topology_Prediction(std::vector<unsigned>& topology, std::vector<uns
 }
 
 void Create_Neural_Networks(std::vector<kiv_ppr_network::TNetwork>& neural_networks, std::vector<unsigned>& topology) {
+    std::cout << "> Creating neural networks..." << std::endl;
+
     neural_networks.clear();
 
     for (int i = 0; i < NEURAL_NETWORKS_COUNT; i++) {
         neural_networks.push_back(kiv_ppr_network::New_Network(topology));
     }
 
+    std::cout << "> Creating neural networks... DONE" << std::endl;
+    std::cout << "> Count of neural networks: " << neural_networks.size() << std::endl;
 }
 
 std::string Generate_Neural_Ini_CPU(kiv_ppr_network::TNetwork& network) {
+    std::cout << "> Generating INI file with parameters of the best trained neural network..." << std::endl;
+
     std::vector<kiv_ppr_neuron::TLayer> layers = network.layers;
     std::string generated_str;
 
@@ -78,6 +84,8 @@ std::string Generate_Neural_Ini_CPU(kiv_ppr_network::TNetwork& network) {
 
         generated_str.append("\n");
     }
+
+    std::cout << "> Generating INI file with parameters of the best trained neural network... DONE" << std::endl;
 
     return generated_str;
 }
@@ -143,6 +151,8 @@ kiv_ppr_smp::TResults_Training_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<dou
 
     unsigned num_of_training_sets = expected_values.size();
 
+    std::cout << "> Training neural networks..." << std::endl;
+
     for (unsigned i = 0; i < num_of_training_sets; i++) {
 
         tbb::parallel_for(size_t(0), neural_networks.size(), [&](size_t j) {
@@ -160,6 +170,8 @@ kiv_ppr_smp::TResults_Training_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<dou
 
     }
 
+    std::cout << "> Training neural networks... DONE" << std::endl;
+
     // Nalezeni nejlepe natrenovane site
     kiv_ppr_network::TNetwork& best_network = neural_networks[Find_Best_Network_Index(neural_networks)];
 
@@ -172,6 +184,8 @@ kiv_ppr_smp::TResults_Training_CPU kiv_ppr_smp::Run_Training_CPU(std::vector<dou
 }
 
 void Set_Weights(kiv_ppr_network::TNetwork& network, std::vector<std::vector<double>>& loaded_weights) {
+    std::cout << "> Setting loaded weights to neural network..." << std::endl;
+
     std::vector<kiv_ppr_neuron::TLayer>& layers = network.layers;
 
     for (unsigned i = 1; i < layers.size(); i++) {
@@ -193,6 +207,8 @@ void Set_Weights(kiv_ppr_network::TNetwork& network, std::vector<std::vector<dou
 
     }
 
+    std::cout << "> Setting loaded weights to neural network... DONE" << std::endl;
+
 }
 
 kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector<double>& input_values,
@@ -209,11 +225,15 @@ kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector
     Create_Topology_Prediction(topology, neural_network_params);
 
     // Vytvoreni neuronove site s danou topologii
+    std::cout << "> Creating neural network..." << std::endl;
     kiv_ppr_network::TNetwork neural_network = kiv_ppr_network::New_Network(topology);
+    std::cout << "> Creating neural network... DONE" << std::endl;
 
     Set_Weights(neural_network, loaded_weights);
 
     unsigned num_of_training_sets = expected_values.size();
+
+    std::cout << "> Prediction..." << std::endl;
 
     for (unsigned i = 0; i < num_of_training_sets; i++) {
 
@@ -227,6 +247,8 @@ kiv_ppr_smp::TResults_Prediction_CPU kiv_ppr_smp::Run_Prediction_CPU(std::vector
         kiv_ppr_network::Add_Result_Value(neural_network, result_values);
 
     }
+
+    std::cout << "> Prediction... DONE" << std::endl;
 
     result.network = neural_network;
     result.csv_str = kiv_ppr_utils::Generate_Csv(neural_network.relative_errors_vector);

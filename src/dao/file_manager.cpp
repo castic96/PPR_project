@@ -1,6 +1,6 @@
 #include "file_manager.h"
 
-void Save_File(std::string file_path, std::string& to_write, std::string suffix) {
+void Save_File(std::string& file_path, std::string& to_write, std::string suffix) {
 	size_t index = file_path.rfind(suffix);
 
 	if (index != file_path.length() - 4) {
@@ -15,50 +15,67 @@ void Save_File(std::string file_path, std::string& to_write, std::string suffix)
 }
 
 void kiv_ppr_file_manager::Save_Svg_File(std::string file_path, std::string& graph) {
-	std::string suffix = ".svg";
+	std::cout << "> Saving SVG file..." << std::endl;
 
+	std::string suffix = ".svg";
 	Save_File(file_path, graph, suffix);
+
+	std::cout << "> Saving SVG file... DONE" << std::endl;
+	std::cout << "> SVG file saved to: " << file_path << std::endl;
 }
 
 void kiv_ppr_file_manager::Save_Ini_File(std::string file_path, std::string& neural_params) {
-	std::string suffix = ".ini";
+	std::cout << "> Saving INI file..." << std::endl;
 
+	std::string suffix = ".ini";
 	Save_File(file_path, neural_params, suffix);
+
+	std::cout << "> Saving INI file... DONE" << std::endl;
+	std::cout << "> INI file saved to: " << file_path << std::endl;
 }
 
 void kiv_ppr_file_manager::Save_Csv_File(std::string file_path, std::string& errors) {
-	std::string suffix = ".csv";
+	std::cout << "> Saving CSV file..." << std::endl;
 
+	std::string suffix = ".csv";
 	Save_File(file_path, errors, suffix);
+
+	std::cout << "> Saving CSV file... DONE" << std::endl;
+	std::cout << "> CSV file saved to: " << file_path << std::endl;
 }
 
 void kiv_ppr_file_manager::Save_Results_File(std::string file_path, std::string& results) {
-	std::string suffix = ".txt";
+	std::cout << "> Saving TXT results file..." << std::endl;
 
+	std::string suffix = ".txt";
 	Save_File(file_path, results, suffix);
+
+	std::cout << "> Saving TXT results file... DONE" << std::endl;
+	std::cout << "> TXT results file saved to: " << file_path << std::endl;
 }
 
 bool Load_File(std::string file_path, std::ifstream& input_file, std::string suffix) {
 	size_t index = file_path.rfind(suffix);
 
 	if (index != file_path.length() - 4) {
-		std::cout << "Specified file '" << file_path << "' does not have required type." << std::endl;
+		std::cout << "> Specified file '" << file_path << "' does not have required type." << std::endl;
 		return false;
 	}
 
 	input_file = std::ifstream(file_path);
 
 	if (!input_file.is_open()) {
-		std::cout << "File '" << file_path << "' does not exists." << std::endl;
+		std::cout << "> File '" << file_path << "' does not exists." << std::endl;
 		return false;
 	}
 
-	std::cout << "File '" << file_path << "' loaded successfully." << std::endl;
 	return true;
 
 }
 
 bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std::vector<double>>& loaded_weights, std::vector<unsigned>& neural_network_params) {
+	std::cout << "> Loading INI file '" << file_path << "' with parameters of neural network..." << std::endl;
+	
 	std::ifstream input_ini_file;
 	std::string suffix = ".ini";
 
@@ -82,7 +99,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 		[](unsigned char c) { return std::tolower(c); });
 
 	if (line.find(hidden_layer_lbl) == std::string::npos) {
-		std::cout << "Specified file '" << file_path << "' does not have required format." << std::endl;
+		std::cout << "> Specified file '" << file_path << "' does not have required format." << std::endl;
 		return false;
 	}
 
@@ -127,7 +144,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 				std::istringstream is_stream(line);
 
 				if (!(is_stream >> current_neuron_index >> weight)) {
-					std::cout << "Error while reading file '" << file_path << "'" << std::endl;
+					std::cout << "> Error while reading file '" << file_path << "'" << std::endl;
 					return false;
 				}
 
@@ -139,7 +156,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 				std::istringstream is_stream(line);
 
 				if (!(is_stream >> current_neuron_index >> current_weight_index >> weight)) {
-					std::cout << "Error while reading file '" << file_path << "'" << std::endl;
+					std::cout << "> Error while reading file '" << file_path << "'" << std::endl;
 					return false;
 				}
 
@@ -169,7 +186,7 @@ bool kiv_ppr_file_manager::Load_Ini_File(std::string file_path, std::vector<std:
 	neural_network_params.push_back(weight_index + 1);
 	neural_network_params.push_back(neuron_index + 1);
 
-	std::cout << "Reading file '" << file_path << "' successfull." << std::endl;
+	std::cout << "> Loading INI file '" << file_path << "' with parameters of neural network... DONE" << std::endl;
+	
 	return true;
-
 }

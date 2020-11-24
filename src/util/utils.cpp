@@ -105,6 +105,8 @@ double kiv_ppr_utils::Calculate_Total_Error(std::vector<double> relative_errors_
 }
 
 std::string kiv_ppr_utils::Generate_Csv(std::vector<double> relative_errors_vector) {
+    std::cout << "> Generating CSV file with relative errors..." << std::endl;
+
     std::string generated_str;
     unsigned relative_errors_size = relative_errors_vector.size();
     unsigned step = relative_errors_size / 100;
@@ -120,6 +122,8 @@ std::string kiv_ppr_utils::Generate_Csv(std::vector<double> relative_errors_vect
         generated_str.append(std::to_string(relative_errors_vector[i]));
         generated_str.append(",");
     }
+
+    std::cout << "> Generating CSV file with relative errors... DONE" << std::endl;
 
     return generated_str;
 }

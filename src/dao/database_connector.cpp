@@ -16,30 +16,32 @@ kiv_ppr_db_connector::TData_Reader kiv_ppr_db_connector::New_Reader(char* db_nam
 }
 
 bool kiv_ppr_db_connector::Open_Database(kiv_ppr_db_connector::TData_Reader &reader) {
+    std::cout << "> Opening database '" << reader.db_name << "'..." << std::endl;
 
     if (sqlite3_open_v2(reader.db_name, &(reader.db_handler), SQLITE_OPEN_READONLY, NULL) != SQLITE_OK) {
-        std::cout << "Cannot open database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
+        std::cout << "> Cannot open database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
         return false;
     }
 
     else
     {
-        std::cout << "Database opened successfully!" << std::endl;
+        std::cout << "> Opening database... DONE" << std::endl;
         return true;
     }
 
 }
 
 bool kiv_ppr_db_connector::Close_Database(kiv_ppr_db_connector::TData_Reader& reader) {
+    std::cout << "> Closing database..." << std::endl;
 
     if (sqlite3_close(reader.db_handler) != SQLITE_OK) {
-        std::cout << "Cannot close database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
+        std::cout << "> Cannot close database: " << sqlite3_errmsg(reader.db_handler) << std::endl;
         return false;
     }
 
     else
     {
-        std::cout << "Database closed successfully!" << std::endl;
+        std::cout << "> Closing database... DONE" << std::endl;
         return true;
     }
 
@@ -55,6 +57,8 @@ kiv_ppr_db_connector::TElement New_Element(double ist, unsigned segment_id) {
 }
 
 std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_db_connector::Load_Data(kiv_ppr_db_connector::TData_Reader& reader) {
+    std::cout << "> Loading data from database..." << std::endl;
+
     int return_code = 0;
     std::vector<kiv_ppr_db_connector::TElement> cached_data;
     sqlite3* db_handler = reader.db_handler;
@@ -63,7 +67,7 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_db_connector::Load_Data(kiv_
     const char* sql_command = "select ist, segmentid from measuredvalue order by id;";
 
     if (sqlite3_prepare_v2(db_handler, sql_command, -1, &statement, NULL) != SQLITE_OK) {
-        std::cout << "Prepare sql command failure: " << sqlite3_errmsg(db_handler) << std::endl;
+        std::cout << "> Prepare sql command failure: " << sqlite3_errmsg(db_handler) << std::endl;
         cached_data.clear();
         return cached_data;
     }
@@ -84,10 +88,14 @@ std::vector<kiv_ppr_db_connector::TElement> kiv_ppr_db_connector::Load_Data(kiv_
 
 
     if (return_code != SQLITE_DONE) {
-        std::cout << "SQL execution error: " << sqlite3_errmsg(db_handler) << std::endl;
+        std::cout << "> SQL execution error: " << sqlite3_errmsg(db_handler) << std::endl;
+        cached_data.clear();
+        return cached_data;
     }
 
     sqlite3_finalize(statement);
+
+    std::cout << "> Loading data from database... DONE" << std::endl;
 
     return cached_data;
 }

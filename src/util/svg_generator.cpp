@@ -214,6 +214,8 @@ void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 }
 
 void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::string& green_graph, std::string& blue_graph) {
+	std::cout << "> Generating SVG file with graphs..." << std::endl;
+
 	std::vector<kiv_ppr_neuron::TLayer>& layers = generator.network.layers;
 	std::vector<std::vector<std::string>>& svg_synapses = generator.svg_synapses;
 	std::vector<std::vector<std::string>>& svg_texts = generator.svg_texts;
@@ -270,6 +272,8 @@ void Generate_Graphs(kiv_ppr_svg_generator::TSvg_Generator& generator, std::stri
 		}
 
 	}
+
+	std::cout << "> Generating SVG file with graphs... DONE" << std::endl;
 
 }
 

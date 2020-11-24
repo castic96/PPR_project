@@ -23,6 +23,8 @@ std::string Generate_Label_Bias(unsigned i) {
 }
 
 std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
+    std::cout << "> Generating INI file with parameters of neural network..." << std::endl;
+
     std::string generated_str;
 
     generated_str.append("[hidden_layer_1]\n");
@@ -87,10 +89,13 @@ std::string Generate_Neural_Ini_GPU(kiv_ppr_network_gpu::TNetworkGPU& network) {
         }
     }
 
+    std::cout << "> Generating INI file with parameters of neural network... DONE" << std::endl;
+
     return generated_str;
 }
 
 kiv_ppr_gpu::TResults_Training_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<double>& input_values, std::vector<double>& target_values, std::vector<double>& expected_values) {
+
     kiv_ppr_gpu::TResults_Training_GPU result;
     std::vector<double> relative_errors_vector;
 
@@ -101,6 +106,7 @@ kiv_ppr_gpu::TResults_Training_GPU kiv_ppr_gpu::Run_Training_GPU(std::vector<dou
     kiv_ppr_network_gpu::TNetworkGPU network = kiv_ppr_network_gpu::New_Network(input_values, target_values, num_of_training_sets);
 
     if (!network.is_valid) {
+        exit(EXIT_FAILURE);
         return result;
     }
 
