@@ -30,6 +30,9 @@ namespace kiv_ppr_mapping_gpu {
 	*
 	* params:
 	*   i - index neuronu
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Input_Neuron_I(int i);
 
@@ -38,6 +41,9 @@ namespace kiv_ppr_mapping_gpu {
 	*
 	* params:
 	*   i - index neuronu
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Hidden1_Neuron_I(int i);
 
@@ -46,6 +52,9 @@ namespace kiv_ppr_mapping_gpu {
 	*
 	* params:
 	*   i - index neuronu
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Hidden2_Neuron_I(int i);
 
@@ -54,6 +63,9 @@ namespace kiv_ppr_mapping_gpu {
 	*
 	* params:
 	*   i - index neuronu
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Output_Neuron_I(int i);
 
@@ -63,6 +75,9 @@ namespace kiv_ppr_mapping_gpu {
 	* params:
 	*   input - index neuronu ve vstupni vrstve
 	*	hidden1 - index neuronu v prvni skryte vrstve
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Weight_Input_Hidden1(int input, int hidden1);
 
@@ -72,6 +87,9 @@ namespace kiv_ppr_mapping_gpu {
 	* params:
 	*   hidden1 - index neuronu v prvni skryte vrstve
 	*	hidden2 - index neuronu ve druhe skryte vrstve
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Weight_Hidden1_Hidden2(int hidden1, int hidden2);
 
@@ -81,6 +99,9 @@ namespace kiv_ppr_mapping_gpu {
 	* params:
 	*   hidden2 - index neuronu ve druhe skryte vrstve
 	*	output - index neuronu ve vystupni vrstve
+	*
+	* return:
+	*	namapovana hodnota
 	*/
 	int Weight_Hidden2_Output(int hidden2, int output);
 

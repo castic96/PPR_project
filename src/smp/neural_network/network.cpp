@@ -16,6 +16,9 @@
 *	set_num - cislo trenovaciho vzorku
 *   n - index neuronu
 *	input_layer_neurons_count - pocet neuronu vstupni vrstvy
+*
+* return:
+*	namapovana hodnota
 */
 int Input_Value(int set_num, int n, unsigned input_layer_neurons_count) {
 	return set_num * input_layer_neurons_count + n;
@@ -28,6 +31,9 @@ int Input_Value(int set_num, int n, unsigned input_layer_neurons_count) {
 *	set_num - cislo trenovaciho vzorku
 *   n - index neuronu
 *	input_layer_neurons_count - pocet neuronu vstupni vrstvy
+*
+* return:
+*	namapovana hodnota
 */
 int Target_Value(int set_num, int n, unsigned output_layer_neurons_count) {
 	return set_num * output_layer_neurons_count + n;
