@@ -18,11 +18,11 @@ namespace kiv_ppr_synapse {
 	* counter_blue_graph - counter pro modry graf
 	*/
 	struct TSynapse {
-		double weight;
-		double delta_weight;
-		double current_counter;
-		double counter_green_graph;
-		double counter_blue_graph;
+		double weight = 0.0;
+		double delta_weight = 0.0;
+		double current_counter = 0.0;
+		double counter_green_graph = 0.0;
+		double counter_blue_graph = 0.0;
 	};
 
 	/**

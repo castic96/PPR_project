@@ -18,8 +18,8 @@ namespace kiv_ppr_db_connector {
 	* db_hander - handler k databazi
 	*/
 	struct TData_Reader {
-		char *db_name;
-		sqlite3 *db_handler;
+		char *db_name = nullptr;
+		sqlite3 *db_handler = nullptr;
 	};
 
 	/**

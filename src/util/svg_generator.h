@@ -134,11 +134,11 @@ namespace kiv_ppr_svg_generator {
 	*/
 	struct TSvg_Generator {
 		kiv_ppr_network::TNetwork network;
-		double min_counter_green_graph;
-		double max_counter_green_graph;
-		double min_counter_blue_graph;
-		double max_counter_blue_graph;
-		unsigned max_neurons;
+		double min_counter_green_graph = 0.0;
+		double max_counter_green_graph = 0.0;
+		double min_counter_blue_graph = 0.0;
+		double max_counter_blue_graph = 0.0;
+		unsigned max_neurons = 0;
 		std::string frame;
 		std::vector<std::vector<std::string>> svg_synapses;
 		std::vector<std::vector<std::string>> svg_texts;
