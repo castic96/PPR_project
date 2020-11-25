@@ -77,7 +77,7 @@ void Initialize_Max_Values(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 		}
 
 		for (unsigned j = 0; j < neurons_count; j++) {
-			kiv_ppr_neuron::TNeuron& current_neuron = current_layer.neurons[i];
+			kiv_ppr_neuron::TNeuron& current_neuron = current_layer.neurons[j];
 
 			for (unsigned k = 0; k < current_neuron.output_weights.size(); k++) {
 				double current_counter_green_graph = current_neuron.output_weights[k].counter_green_graph;
@@ -220,9 +220,9 @@ std::string Generate_Svg_Neuron(unsigned x, unsigned y) {
 *	naskalovana hodnota v danem rozmezi
 */
 unsigned Scale_Value(double count, double min_value, double max_value) {
-	return static_cast<unsigned int>((count - min_value) * 
-				(kiv_ppr_svg_generator::graph_max_value - kiv_ppr_svg_generator::graph_min_value) /
-				(max_value - min_value) + kiv_ppr_svg_generator::graph_min_value);
+	return static_cast<unsigned int>((count - min_value) *
+		(kiv_ppr_svg_generator::graph_max_value - kiv_ppr_svg_generator::graph_min_value) /
+		(max_value - min_value) + kiv_ppr_svg_generator::graph_min_value);
 }
 
 /**
@@ -251,9 +251,6 @@ void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 		kiv_ppr_neuron::TLayer& current_layer = layers[i];
 		unsigned current_neurons_count = current_layer.neurons.size() - 1;
 
-		kiv_ppr_neuron::TLayer& previous_layer = layers[i - 1];
-		unsigned previous_neurons_count = previous_layer.neurons.size() - 1;
-
 		y_init = kiv_ppr_svg_generator::screen_margin_y + Scale_Layers_Y(current_neurons_count, max_neurons);
 		y = y_init;
 
@@ -267,6 +264,9 @@ void Generate_Frame(kiv_ppr_svg_generator::TSvg_Generator& generator) {
 			frame.append(kiv_ppr_svg_generator::line_space);
 
 			if (i > 0) {
+
+				kiv_ppr_neuron::TLayer& previous_layer = layers[i - 1];
+				unsigned previous_neurons_count = previous_layer.neurons.size() - 1;
 
 				unsigned y_text = y - Scale_Texts_Y(previous_neurons_count, max_neurons) + (kiv_ppr_svg_generator::text_font_size);
 
