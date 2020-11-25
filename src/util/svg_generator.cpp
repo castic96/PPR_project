@@ -30,7 +30,7 @@ kiv_ppr_svg_generator::TSvg_Generator kiv_ppr_svg_generator::New_Generator(kiv_p
 }
 
 /**
-* Nastavi hodnotu do SVH objektu misto zastupce.
+* Nastavi hodnotu do SVG objektu misto zastupce.
 *
 * params:
 *   svg_object - SVG objekt
