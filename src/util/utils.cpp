@@ -137,7 +137,7 @@ double kiv_ppr_utils::Calc_Average_Relative_Error(std::vector<double> relative_e
     size_t vector_size = relative_errors_vector.size();
     double sum = 0.0;
 
-    for (unsigned i = 0; i < vector_size; i++) {
+    for (size_t i = 0; i < vector_size; i++) {
         sum += relative_errors_vector[i];
     }
 
@@ -158,7 +158,7 @@ double kiv_ppr_utils::Calc_Standard_Deviation(std::vector<double> relative_error
     double average_error = kiv_ppr_utils::Calc_Average_Relative_Error(relative_errors_vector);
     double sum = 0.0;
 
-    for (unsigned i = 0; i < vector_size; i++) {
+    for (size_t i = 0; i < vector_size; i++) {
         sum += pow(relative_errors_vector[i] - average_error, 2);
     }
 
