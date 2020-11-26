@@ -149,7 +149,7 @@ double kiv_ppr_neuron::Transfer_Function_Output_Der(double value) {
 void kiv_ppr_neuron::Compute_Output_Gradient(kiv_ppr_neuron::TNeuron& neuron, double target_value) {
 	double delta = target_value - neuron.output_value;
 
-	neuron.gradient = delta * kiv_ppr_neuron::Transfer_Function_Output_Der(neuron.output_value);
+	neuron.gradient = delta;
 }
 
 /**
